@@ -1,7 +1,8 @@
 import numpy as np,matplotlib.pyplot as plt,seaborn as sns
 from itertools import product
 import random
-from multiprocessing import Pool
+import math
+from tqdm.notebook import tqdm_notebook
 
 
 ##################### base representation classes and functions #############################
@@ -68,7 +69,7 @@ class RecursiveGrpElt():
             return RecursiveGrpElt(new_vals, self.carry_table)
         
 #construct table for all tuples of a given length
-def construct_product_table(table,depth):
+def construct_product_table(table, depth):
     d=len(table)
     tab=np.zeros((d**depth,d**depth))
     rt=RecursiveTable(table)
@@ -80,52 +81,28 @@ def construct_product_table(table,depth):
 
 ############################## cocycle-finding functions #############################
 
-# def assert_cocycle(table, depth=2, sample=False, n_samples=None):
-#     d=table.shape[0]
-#     tuples = list(product(*[range(d)]*depth))
-#     if sample:
-#         tuples = random.sample(tuples, n_samples)
-#     for v1 in tuples: #iterate over all tuples of given depth
-#         for v2 in tuples:
-#             for v3 in tuples:
-#                 g1=RecursiveGrpElt(v1, table)
-#                 g2=RecursiveGrpElt(v2, table)
-#                 g3=RecursiveGrpElt(v3, table)
-
-#                 s1=(g1+g2)+g3
-#                 s2=g1+(g2+g3)
-#                 is_assoc=s1.vals==s2.vals
-#                 if not is_assoc:
-#                     return False
-#     return True
-
-def assert_cocycle_worker(args):
-    v1, v2, v3, table = args
-    g1 = RecursiveGrpElt(v1, table)
-    g2 = RecursiveGrpElt(v2, table)
-    g3 = RecursiveGrpElt(v3, table)
-
-    s1 = (g1 + g2) + g3
-    s2 = g1 + (g2 + g3)
-    is_assoc = np.array_equal(s1.vals, s2.vals)
-    
-    return is_assoc
-
-def assert_cocycle(table, depth=2, num_processes=12, sample=False, n_samples=None):
-    d = table.shape[0]
-    tuples = list(product(*[range(d)] * depth))
+def assert_cocycle(table, depth=2, sample=False, frac=False, n=False):
+    d=table.shape[0]
+    tuples = list(product(*[range(d)]*depth))
     if sample:
-        tuples = random.sample(tuples, n_samples)
+        if frac:
+            tuples = random.sample(tuples, math.floor(d**depth * frac))
+        if n:
+            assert n <= d**depth, "n too large"
+            tuples = random.sample(tuples, n)
+    for v1 in tuples: #iterate over all tuples of given depth
+        for v2 in tuples:
+            for v3 in tuples:
+                g1=RecursiveGrpElt(v1, table)
+                g2=RecursiveGrpElt(v2, table)
+                g3=RecursiveGrpElt(v3, table)
 
-    # Prepare arguments for the worker function
-    worker_args = [(v1, v2, v3, table) for v1 in tuples for v2 in tuples for v3 in tuples]
-
-    # Use multiprocessing.Pool to parallelize the workload
-    with Pool(processes=num_processes) as pool:
-        results = pool.map(assert_cocycle_worker, worker_args)
-
-    # Check if any result is False, indicating a failure
-    return all(results)
+                s1=(g1+g2)+g3
+                s2=g1+(g2+g3)
+                is_assoc=s1.vals==s2.vals
+                if not is_assoc:
+                    return False
+    return True
 
 def construct_table(d, h):
     basic_table=1*(np.add.outer(np.arange(d),np.arange(d))>=d)
@@ -135,12 +112,19 @@ def construct_table(d, h):
             table[i, j] = (basic_table[i, j] + h[(i+j)%d] - h[i] - h[j]) % d
     return table
 
-def construct_tables(d, num_processes=12, sample=False, n_samples=None):
+def construct_tables(d, sample=False, frac=False, n=False):
     table_dict = {}
-    for h in product(*[range(d)]*(d-1)):
+    hs = list(product(*[range(d)]*(d-1)))
+    for h in tqdm_notebook(hs):
         h = (0,) + h
         table = construct_table(d, h)
-        if assert_cocycle(table, num_processes=num_processes, sample=sample, n_samples=n_samples):
+        if assert_cocycle(table, sample=sample, frac=frac, n=n):
             if not any([np.array_equal(table, o_table) for o_table in table_dict.values()]):
                 table_dict[str(h)] = table
+    if sample:
+        valid_h = []
+        for h in table_dict.keys():
+            if assert_cocycle(table_dict[h]):
+                valid_h.append(h)
+        table_dict = {h: table_dict[h] for h in valid_h}
     return table_dict
