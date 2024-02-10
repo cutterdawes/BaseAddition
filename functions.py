@@ -128,3 +128,40 @@ def construct_tables(d, sample=False, frac=False, n=False):
                 valid_h.append(h)
         table_dict = {h: table_dict[h] for h in valid_h}
     return table_dict
+
+
+############################## displaying carry tables #############################
+
+def show_tables(table_dict, d, depth=False):
+    
+    # create fig, axes
+    n = len(table_dict)
+    w = int(np.ceil(np.sqrt(n)))
+    fig, axes = plt.subplots(math.ceil(n / w), w, figsize=(2*w, 2*n//w))
+    axes = axes.flatten()
+    
+    # iterate through table_dict
+    i = 0
+    for h in table_dict.keys():
+
+        # get h and table, construct product table if specified
+        h = list(table_dict.keys())[i]
+        table = table_dict[h]
+        if depth:
+            table = construct_product_table(table, depth)
+
+        # display image, increment i
+        ax = axes[i]
+        im = ax.imshow(table, cmap='viridis', vmin=0, vmax=d-1)
+        ax.set_title('h = ' + h, fontsize=10)
+        i += 1
+
+    # turn off axes
+    for ax in axes:
+        ax.axis('off')
+    
+    # add colorbar
+    fig.subplots_adjust(right=0.9)
+    cbar_ax = fig.add_axes([0.94, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(im, cax=cbar_ax)
+    cbar.set_ticks(range(d))
