@@ -109,7 +109,7 @@ def construct_table(d, h):
     table = np.zeros((d, d), dtype='int')
     for i in range(d):
         for j in range(d):
-            table[i, j] = (basic_table[i, j] + h[(i+j)%d] - h[i] - h[j]) % d
+            table[i, j] = (basic_table[i, j] + h[(i+j)%d] - h[i] - h[j]) % d # is this implementation incorrect?
     return table
 
 def construct_tables(d, sample=False, frac=False, n=False):
@@ -138,7 +138,10 @@ def show_tables(table_dict, d, depth=False):
     n = len(table_dict)
     w = int(np.ceil(np.sqrt(n)))
     fig, axes = plt.subplots(math.ceil(n / w), w, figsize=(2*w, 2*n//w))
-    axes = axes.flatten()
+    try:
+        axes = axes.flatten()
+    except:
+        axes = [axes]
     
     # iterate through table_dict
     i = 0
