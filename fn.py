@@ -9,7 +9,7 @@ from tqdm.notebook import tqdm_notebook
 
 class RecursiveTable():
     def __init__(self, carry_table):
-        self.d = len(carry_table)
+        self.b = len(carry_table)
         self.carry_table = carry_table
         # prev_level should be either a table (i.e. array) or RecursiveTable
 
@@ -25,7 +25,7 @@ class RecursiveTable():
         a, b = g1[0], g2[0]
         t1, t2 = g1[1:], g2[1:]
         z = self[(t1, t2)]
-        res = (self[((a + b) % self.d,), (z,)] + self[(a,), (b,)]) % self.d
+        res = (self[((a + b) % self.b,), (z,)] + self[(a,), (b,)]) % self.b
         return res
 
 # elements of the form (d1,...,dk) in which addition is performed by recursively applying the carry table
@@ -34,7 +34,7 @@ class RecursiveGrpElt():
         self.carry_table = carry_table
         self.vals = vals
         self.rt = RecursiveTable(carry_table)
-        self.d = len(carry_table)
+        self.b = len(carry_table)
 
     def __add__(self, other):
         if len(self.vals) != len(other.vals):
@@ -48,7 +48,7 @@ class RecursiveGrpElt():
         else:
             if len(self.vals) == 1:
                 carried = self.carry_table[self.vals[0], other.vals[0]]
-                new_vals = [carried] + [(self.vals[0] + other.vals[0]) % self.d]
+                new_vals = [carried] + [(self.vals[0] + other.vals[0]) % self.b]
                 if carried == 0:
                     new_vals = new_vals[1:]
                 return RecursiveGrpElt(tuple(new_vals), self.carry_table)
@@ -57,9 +57,9 @@ class RecursiveGrpElt():
             z = self.rt[(self.vals[1:], other.vals[1:])]
             # overall carried element
             carried = self.carry_table[self.vals[0], other.vals[0]]
-            carried += self.carry_table[(self.vals[0] + other.vals[0]) % self.d, z]
-            carried = (carried) % self.d
-            new_a = (self.vals[0] + other.vals[0] + z) % self.d
+            carried += self.carry_table[(self.vals[0] + other.vals[0]) % self.b, z]
+            carried = (carried) % self.b
+            new_a = (self.vals[0] + other.vals[0] + z) % self.b
             g1 = RecursiveGrpElt(self.vals[1:], self.carry_table)
             g2 = RecursiveGrpElt(other.vals[1:], self.carry_table)
             new_tail = list((g1 + g2).vals)[-len(self.vals[1:]):]
@@ -70,26 +70,23 @@ class RecursiveGrpElt():
         
 #construct table for all tuples of a given length
 def construct_product_table(table, depth):
-    d=len(table)
-    tab=np.zeros((d**depth,d**depth))
+    b=len(table)
+    tab=np.zeros((b**depth,b**depth))
     rt=RecursiveTable(table)
-    for i,v1 in enumerate(product(*[range(d)]*depth)):
-        for j,v2 in enumerate(product(*[range(d)]*depth)):
+    for i,v1 in enumerate(product(*[range(b)]*depth)):
+        for j,v2 in enumerate(product(*[range(b)]*depth)):
             tab[i,j]=rt[(v1,v2)]
     return tab
 
 
 ############################## cocycle-finding functions #############################
 
-def assert_cocycle(table, depth=2, sample=False, frac=False, n=False):
-    d=table.shape[0]
-    tuples = list(product(*[range(d)]*depth))
+def assert_cocycle(table, depth=2, sample=False):
+    b=table.shape[0]
+    tuples = list(product(*[range(b)]*depth))
     if sample:
-        if frac:
-            tuples = random.sample(tuples, math.floor(d**depth * frac))
-        if n:
-            assert n <= d**depth, "n too large"
-            tuples = random.sample(tuples, n)
+        assert (sample <= 3) and (sample <= b**depth), "need 3 <= sample <= b**depth"
+        tuples = random.sample(tuples, sample)
     for v1 in tuples: #iterate over all tuples of given depth
         for v2 in tuples:
             for v3 in tuples:
@@ -104,35 +101,56 @@ def assert_cocycle(table, depth=2, sample=False, frac=False, n=False):
                     return False
     return True
 
-def construct_table(d, h):
-    basic_table=1*(np.add.outer(np.arange(d),np.arange(d))>=d)
-    table = np.zeros((d, d), dtype='int')
-    for i in range(d):
-        for j in range(d):
-            table[i, j] = (basic_table[i, j] + h[(i+j)%d] - h[i] - h[j]) % d # is this implementation incorrect?
+def construct_table(b, c):
+    basic_table=1*(np.add.outer(np.arange(b),np.arange(b))>=b)
+    table = np.zeros((b, b), dtype='int')
+    for i in range(b):
+        for j in range(b):
+            table[i, j] = (basic_table[i, j] + c[(i+j)%b] - c[i] - c[j]) % b
     return table
 
-def construct_tables(d, sample=False, frac=False, n=False):
+def construct_tables(b):
+
+    # initialize variables
     table_dict = {}
-    hs = list(product(*[range(d)]*(d-1)))
-    for h in tqdm_notebook(hs):
-        h = (0,) + h
-        table = construct_table(d, h)
-        if assert_cocycle(table, sample=sample, frac=frac, n=n):
-            if not any([np.array_equal(table, o_table) for o_table in table_dict.values()]):
-                table_dict[str(h)] = table
-    if sample:
-        valid_h = []
-        for h in table_dict.keys():
-            if assert_cocycle(table_dict[h]):
-                valid_h.append(h)
-        table_dict = {h: table_dict[h] for h in valid_h}
+    cs = list(product(*[range(b)]*(b-1)))
+
+    # initial pass
+    pass_n = 1
+    sample=3 if (len(cs)>1000) else sample=False
+    for c in tqdm_notebook(cs, desc=f'Pass {pass_n}'):
+        c = (0,) + c
+        table = construct_table(b, c)
+        if assert_cocycle(table, sample=sample):
+            added = False
+            for o_cs, o_table in table_dict.items():
+                if np.array_equal(table, o_table):
+                    table_dict.pop(o_cs)
+                    o_cs += (c,)
+                    table_dict[o_cs] = table
+                    added = True
+                    break
+            if not added:
+                c = (c,)
+                table_dict[c] = table
+
+    # additional passes
+    while sample:
+        pass_n += 1
+        valid_c = []
+        for c in tqdm_notebook(table_dict.keys(), desc=f'Pass {pass_n}'):
+            if assert_cocycle(table_dict[c], sample=sample):
+                valid_c.append(c)
+        table_dict = {c: table_dict[c] for c in valid_c}
+        import pdb; pdb.set_trace()
+        sample=3 if (len(valid_c)>1000) else sample=False
+        
     return table_dict
 
 
 ############################## displaying carry tables #############################
 
-def show_tables(table_dict, d, depth=False):
+def show_tables(table_dict, b, depth=False):
     
     # create fig, axes
     n = len(table_dict)
@@ -145,18 +163,18 @@ def show_tables(table_dict, d, depth=False):
     
     # iterate through table_dict
     i = 0
-    for h in table_dict.keys():
+    for c in table_dict.keys():
 
-        # get h and table, construct product table if specified
-        h = list(table_dict.keys())[i]
-        table = table_dict[h]
+        # get c and table, construct product table if specified
+        c = list(table_dict.keys())[i]
+        table = table_dict[c]
         if depth:
             table = construct_product_table(table, depth)
 
         # display image, increment i
         ax = axes[i]
-        im = ax.imshow(table, cmap='viridis', vmin=0, vmax=d-1)
-        ax.set_title('h = ' + h, fontsize=10)
+        im = ax.imshow(table, cmap='viridis', vmin=0, vmax=b-1)
+        ax.set_title('c = ' + c, fontsize=10)
         i += 1
 
     # turn off axes
@@ -167,4 +185,4 @@ def show_tables(table_dict, d, depth=False):
     fig.subplots_adjust(right=0.9)
     cbar_ax = fig.add_axes([0.94, 0.15, 0.05, 0.7])
     cbar = fig.colorbar(im, cax=cbar_ax)
-    cbar.set_ticks(range(d))
+    cbar.set_ticks(range(b))
