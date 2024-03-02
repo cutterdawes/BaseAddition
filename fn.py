@@ -2,7 +2,7 @@ import numpy as np,matplotlib.pyplot as plt,seaborn as sns
 from itertools import product
 import random
 import math
-from tqdm.notebook import tqdm_notebook
+from tqdm.autonotebook import tqdm
 
 
 ##################### base representation classes and functions #############################
@@ -109,7 +109,7 @@ def construct_table(b, c):
             table[i, j] = (basic_table[i, j] + c[(i+j)%b] - c[i] - c[j]) % b
     return table
 
-def construct_tables(b):
+def construct_tables(b, n_per_pass=100):
 
     # initialize variables
     table_dict = {}
@@ -117,8 +117,8 @@ def construct_tables(b):
 
     # initial pass
     pass_n = 1
-    sample=3 if (len(cs)>1000) else sample=False
-    for c in tqdm_notebook(cs, desc=f'Pass {pass_n}'):
+    sample = 3 if (len(cs) > n_per_pass) else False
+    for c in tqdm(cs, desc=f'Pass {pass_n}'):
         c = (0,) + c
         table = construct_table(b, c)
         if assert_cocycle(table, sample=sample):
@@ -134,23 +134,30 @@ def construct_tables(b):
                 c = (c,)
                 table_dict[c] = table
 
-    # additional passes
-    while sample:
+    # additional passes if necessary
+    while (len(table_dict) > n_per_pass):
         pass_n += 1
         valid_c = []
-        for c in tqdm_notebook(table_dict.keys(), desc=f'Pass {pass_n}'):
+        for c in tqdm(table_dict.keys(), desc=f'Pass {pass_n}'):
             if assert_cocycle(table_dict[c], sample=sample):
                 valid_c.append(c)
         table_dict = {c: table_dict[c] for c in valid_c}
-        import pdb; pdb.set_trace()
-        sample=3 if (len(valid_c)>1000) else sample=False
+
+    # final pass if necessary
+    if sample:
+        pass_n += 1
+        valid_c = []
+        for c in tqdm(table_dict.keys(), desc=f'Pass {pass_n}'):
+            if assert_cocycle(table_dict[c], sample=False):
+                valid_c.append(c)
+        table_dict = {c: table_dict[c] for c in valid_c}
         
     return table_dict
 
 
 ############################## displaying carry tables #############################
 
-def show_tables(table_dict, b, depth=False):
+def show_tables(table_dict, b, depth=1):
     
     # create fig, axes
     n = len(table_dict)
@@ -166,14 +173,14 @@ def show_tables(table_dict, b, depth=False):
     for c in table_dict.keys():
 
         # get c and table, construct product table if specified
-        c = list(table_dict.keys())[i]
         table = table_dict[c]
-        if depth:
+        if (depth > 1):
             table = construct_product_table(table, depth)
 
         # display image, increment i
         ax = axes[i]
         im = ax.imshow(table, cmap='viridis', vmin=0, vmax=b-1)
+        c = str(sorted(c)[0])
         ax.set_title('c = ' + c, fontsize=10)
         i += 1
 
