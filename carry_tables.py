@@ -15,10 +15,11 @@ def main():
     tables = fn.construct_tables(b)
     
     # Pickle the dictionary and save it to output.pickle
-    with open(f'tables{b}.pickle', 'wb') as file:
+    directory = '/scratch/network/cdawes/Repo/carry_tables'
+    with open(f'{directory}/tables{b}.pickle', 'wb') as file:
         pickle.dump(tables, file)
     
-    print(f'Function executed successfully. Output saved to tables{b}.pickle')
+    print(f'Function executed successfully.\nOutput saved to {directory}/tables{b}.pickle')
 
 if __name__ == '__main__':
     main()
