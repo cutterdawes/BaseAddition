@@ -15,7 +15,7 @@ def main():
     tables = fn.construct_tables(b)
     
     # Pickle the dictionary and save it to output.pickle
-    directory = '/scratch/network/cdawes/Repo/carry_tables'
+    directory = '/scratch/network/cdawes'
     with open(f'{directory}/tables{b}.pickle', 'wb') as file:
         pickle.dump(tables, file)
     

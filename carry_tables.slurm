@@ -14,5 +14,6 @@
 
 module purge
 module load anaconda3/2023.9
+conda activate carry_tables
 
 python carry_tables.py

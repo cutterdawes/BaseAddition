@@ -1,4 +1,5 @@
-import numpy as np,matplotlib.pyplot as plt,seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
 from itertools import product
 import random
 import math
