@@ -10,3 +10,4 @@ dependencies:
   - conda-forge::pickle5
   - conda-forge::gh
   - conda-forge::mpi4py
+  - conda-forge::argparse

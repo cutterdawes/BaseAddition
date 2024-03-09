@@ -2,6 +2,7 @@
 import argparse
 from mpi4py import MPI
 import pickle
+from itertools import product
 import fn
 
 def pickle_tables(tables, args):
