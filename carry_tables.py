@@ -6,10 +6,10 @@ import fn
 
 def pickle_tables(tables, args):
     directory = '/scratch/network/cdawes' if (args.directory is None) else args.directory
-    with open(f'{directory}/tables{args.b}.pickle', 'wb') as file:
+    with open(f'{directory}/tables{args.base}.pickle', 'wb') as file:
         pickle.dump(tables, file)
-    if args.c is None:
-        print(f'Function executed successfully.\nOutput saved to {directory}/tables{args.b}.pickle')
+    if args.cores is None:
+        print(f'Function executed successfully.\nOutput saved to {directory}/tables{args.base}.pickle')
 
 def parallel_case(args):
     # initialize MPI
@@ -17,12 +17,12 @@ def parallel_case(args):
     rank = comm.Get_rank()
 
     # create and scatter candidate cocycles to workers
-    cs = list(product(*[range(args.b)]*(args.b-1)))
+    cs = list(product(*[range(args.base)]*(args.base-1)))
     scattered_cs = np.empty_like(cs)
     comm.Scatter(cs, scattered_cs, root=0)
 
     # check candidate cocycles on each worker's portion
-    scattered_tables = fn.construct_tables(args.b, cs=scattered_cs)
+    scattered_tables = fn.construct_tables(args.base, cs=scattered_cs)
 
     # gather tables from all workers
     gathered_tables = comm.gather(scattered_tables, root=0)
@@ -43,9 +43,9 @@ def main():
     args = parser.parse_args()
     
     # compute carry tables
-    if args.c is None:
+    if args.cores is None:
         # serial case
-        tables = fn.construct_tables(args.b)
+        tables = fn.construct_tables(args.base)
         pickle_tables(tables, args)
     else:
         # parallel case
