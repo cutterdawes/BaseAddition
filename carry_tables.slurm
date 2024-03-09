@@ -1,7 +1,17 @@
 #!/bin/bash
+
+# determine number of nodes and tasks
+if [ $# -eq 3 ]; then
+    nodes = $2
+    tasks = $3
+else
+    nodes = 1
+    tasks = 1
+fi
+
 #SBATCH --job-name=carry_tables
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
+#SBATCH --nodes=$nodes
+#SBATCH --ntasks-per-node=$tasks
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=12G
 #SBATCH --time=72:00:00
@@ -17,9 +27,9 @@ module load anaconda3/2023.9
 module load openmpi/gcc/4.1.2
 conda activate carry_tables
 
-# execute carry_tables.py script depending on arguments given
+# execute carry_tables.py script depending on provided arguments
 if [ $# -eq 1 ]; then
     python carry_tables.py -b $1
 else
-    python carry_tables.py -b $1 -c $2
+    python carry_tables.py -b $1 -p
 fi

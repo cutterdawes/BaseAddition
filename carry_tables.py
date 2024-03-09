@@ -8,7 +8,7 @@ def pickle_tables(tables, args):
     directory = '/scratch/network/cdawes' if (args.directory is None) else args.directory
     with open(f'{directory}/tables{args.base}.pickle', 'wb') as file:
         pickle.dump(tables, file)
-    if args.cores is None:
+    if not args.parallel:
         print(f'Function executed successfully.\nOutput saved to {directory}/tables{args.base}.pickle')
 
 def parallel_case(args):
@@ -38,18 +38,18 @@ def main():
     # create and parse arguments
     parser = argparse.ArgumentParser(description='Compute the valid carry tables for specified base')
     parser.add_argument('-b', '--base', type=int, required=True, help='Specified base')
-    parser.add_argument('-c', '--cores', type=int, required=False, help='Number of cores for parallel processing')
+    parser.add_argument('-p', '--parallel', action='store_true', help='Specify if processing in parallel')
     parser.add_argument('--directory', type=str, required=False, help='directory of pickled tables')
     args = parser.parse_args()
     
     # compute carry tables
-    if args.cores is None:
+    if args.parallel:
+        # parallel case
+        parallel_case(args)
+    else:
         # serial case
         tables = fn.construct_tables(args.base)
         pickle_tables(tables, args)
-    else:
-        # parallel case
-        parallel_case(args)
-    
+
 if __name__ == '__main__':
     main()
