@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # set number of nodes and tasks if specified
-if [ $# -eq 3 ]; then
-    nodes = $2
-    tasks = $3
+if [ $# -eq 1 ]; then
+    nodes=1
+    tasks=1
 else
-    nodes = 1
-    tasks = 1
+    nodes=$2
+    tasks=$3
 fi
 
 # job specifications
