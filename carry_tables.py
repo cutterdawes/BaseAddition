@@ -17,11 +17,12 @@ def parallel_case(args):
     # initialize MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
+    size = comm.Get_size()
 
     # create and scatter candidate cocycles to workers
     cs = np.array(list(product(*[range(args.base)]*(args.base-1))))
-    scattered_cs = np.empty_like(cs)
-    comm.Scatter(cs, scattered_cs, root=0)
+    scattered_cs = np.array_split(cs, size)
+    comm.Scatter(scattered_cs, root=0)
 
     # check candidate cocycles on each worker's portion
     scattered_tables = fn.construct_tables(args.base, cs=scattered_cs)
