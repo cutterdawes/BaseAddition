@@ -2,8 +2,8 @@
 
 # job specifications
 #SBATCH --job-name=carry_tables"
-#SBATCH --nodes=$nodes
-#SBATCH --ntasks-per-node=$tasks
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=12G
 #SBATCH --time=00:10:00
