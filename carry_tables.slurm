@@ -10,16 +10,16 @@ else
 fi
 
 # job specifications
-#SBATCH --job-name=carry_tables
-#SBATCH --nodes=$nodes
-#SBATCH --ntasks-per-node=$tasks
-#SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=12G
-#SBATCH --time=01:00:00
-#SBATCH --mail-type=begin
-#SBATCH --mail-type=end
-#SBATCH --mail-type=fail
-#SBATCH --mail-user=cdawes@princeton.edu
+SBATCH="#SBATCH --job-name=carry_tables"
+SBATCH="$SBATCH --nodes=$nodes"
+SBATCH="$SBATCH --ntasks-per-node=$tasks"
+SBATCH="$SBATCH --cpus-per-task=1"
+SBATCH="$SBATCH --mem-per-cpu=12G"
+SBATCH="$SBATCH --time=72:00:00"
+SBATCH="$SBATCH --mail-type=begin,end,fail"
+SBATCH="$SBATCH --mail-user=cdawes@princeton.edu"
+
+echo "$SBATCH"  # Print the generated SBATCH options
 
 # load modules and activate environment
 module purge
