@@ -19,7 +19,7 @@ def parallel_case(args):
     rank = comm.Get_rank()
 
     # create and scatter candidate cocycles to workers
-    cs = list(product(*[range(args.base)]*(args.base-1)))
+    cs = np.array(list(product(*[range(args.base)]*(args.base-1))))
     scattered_cs = np.empty_like(cs)
     comm.Scatter(cs, scattered_cs, root=0)
 
