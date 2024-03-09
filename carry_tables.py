@@ -5,10 +5,11 @@ import pickle
 import fn
 
 def pickle_tables(tables, args):
-    with open(f'{args.directory}/tables{args.b}.pickle', 'wb') as file:
+    directory = '/scratch/network/cdawes' if (args.directory is None) else args.directory
+    with open(f'{directory}/tables{args.b}.pickle', 'wb') as file:
         pickle.dump(tables, file)
     if args.c is None:
-        print(f'Function executed successfully.\nOutput saved to {args.directory}/tables{args.b}.pickle')
+        print(f'Function executed successfully.\nOutput saved to {directory}/tables{args.b}.pickle')
 
 def parallel_case(args):
     # initialize MPI
