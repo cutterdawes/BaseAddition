@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# determine number of nodes and tasks
+# set number of nodes and tasks if specified
 if [ $# -eq 3 ]; then
     nodes = $2
     tasks = $3
@@ -9,17 +9,17 @@ else
     tasks = 1
 fi
 
+# job specifications
 #SBATCH --job-name=carry_tables
 #SBATCH --nodes=$nodes
 #SBATCH --ntasks-per-node=$tasks
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=12G
-#SBATCH --time=72:00:00
+#SBATCH --time=00:10:00
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH --mail-type=fail
 #SBATCH --mail-user=cdawes@princeton.edu
-#SBATCH --partition=mig
 
 # load modules and activate environment
 module purge
