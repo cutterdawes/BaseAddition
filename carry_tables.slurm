@@ -19,8 +19,6 @@ SBATCH="$SBATCH --time=00:10:00"
 SBATCH="$SBATCH --mail-type=begin,end,fail"
 SBATCH="$SBATCH --mail-user=cdawes@princeton.edu"
 
-echo "$SBATCH" >> carry_tables.slurm  # append the generated SBATCH options to script
-
 # load modules and activate environment
 module purge
 module load anaconda3/2023.9
