@@ -15,11 +15,11 @@ SBATCH="$SBATCH --nodes=$nodes"
 SBATCH="$SBATCH --ntasks-per-node=$tasks"
 SBATCH="$SBATCH --cpus-per-task=1"
 SBATCH="$SBATCH --mem-per-cpu=12G"
-SBATCH="$SBATCH --time=72:00:00"
+SBATCH="$SBATCH --time=00:10:00"
 SBATCH="$SBATCH --mail-type=begin,end,fail"
 SBATCH="$SBATCH --mail-user=cdawes@princeton.edu"
 
-echo "$SBATCH" >> slurm_script.sh  # append the generated SBATCH options to script
+echo "$SBATCH" >> carry_tables.slurm  # append the generated SBATCH options to script
 
 # load modules and activate environment
 module purge
