@@ -13,6 +13,7 @@
 
 module purge
 module load anaconda3/2023.9
+module load openmpi/gcc/4.1.2
 conda activate carry_tables
 
 python carry_tables.py $1

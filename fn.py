@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from itertools import product
+from itertools import product, combinations
 import random
 import math
 from tqdm.autonotebook import tqdm
@@ -88,18 +88,16 @@ def assert_cocycle(table, depth=2, sample=False):
     if sample:
         assert (sample <= 3) and (sample <= b**depth), "need 3 <= sample <= b**depth"
         tuples = random.sample(tuples, sample)
-    for v1 in tuples: #iterate over all tuples of given depth
-        for v2 in tuples:
-            for v3 in tuples:
-                g1=RecursiveGrpElt(v1, table)
-                g2=RecursiveGrpElt(v2, table)
-                g3=RecursiveGrpElt(v3, table)
+    for (v1, v2, v3) in combinations(tuples, 3): #iterate over all tuples of given depth
+        g1=RecursiveGrpElt(v1, table)
+        g2=RecursiveGrpElt(v2, table)
+        g3=RecursiveGrpElt(v3, table)
 
-                s1=(g1+g2)+g3
-                s2=g1+(g2+g3)
-                is_assoc=s1.vals==s2.vals
-                if not is_assoc:
-                    return False
+        s1=(g1+g2)+g3
+        s2=g1+(g2+g3)
+        is_assoc=s1.vals==s2.vals
+        if not is_assoc:
+            return False
     return True
 
 def construct_table(b, c):
@@ -110,11 +108,12 @@ def construct_table(b, c):
             table[i, j] = (basic_table[i, j] + c[(i+j)%b] - c[i] - c[j]) % b
     return table
 
-def construct_tables(b, n_per_pass=100):
+def construct_tables(b, n_per_pass=100, cs=False):
 
     # initialize variables
     table_dict = {}
-    cs = list(product(*[range(b)]*(b-1)))
+    if not cs:
+        cs = list(product(*[range(b)]*(b-1)))
 
     # initial pass
     pass_n = 1
