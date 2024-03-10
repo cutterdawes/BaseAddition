@@ -26,7 +26,7 @@ class RecursiveTable():
         a, b = g1[0], g2[0]
         t1, t2 = g1[1:], g2[1:]
         z = self[(t1, t2)]
-        res = (self[((a + b) % self.b,), (z,)] + self[(a,), (b,)]) % self.b
+        res = (self[((a + b) % self.b,), (z,)]  + self[(a,), (b,)]) % self.b
         return res
 
 # elements of the form (d1,...,dk) in which addition is performed by recursively applying the carry table
@@ -108,11 +108,11 @@ def construct_table(b, c):
             table[i, j] = (basic_table[i, j] + c[(i+j)%b] - c[i] - c[j]) % b
     return table
 
-def construct_tables(b, n_per_pass=100, cs=False):
+def construct_tables(b, n_per_pass=100, cs=None):
 
     # initialize variables
     table_dict = {}
-    if not cs:
+    if cs is not None:
         cs = list(product(*[range(b)]*(b-1)))
 
     # initial pass
