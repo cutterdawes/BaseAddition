@@ -42,7 +42,7 @@ def main():
     parser = argparse.ArgumentParser(description='Compute the valid carry tables for specified base')
     parser.add_argument('-b', '--base', type=int, required=True, help='Specified base')
     parser.add_argument('-p', '--parallel', action='store_true', help='Specify if processing in parallel')
-    parser.add_argument('--directory', type=str, required=False, help='directory of pickled tables')
+    parser.add_argument('-d', '--directory', type=str, required=False, help='directory of pickled tables')
     args = parser.parse_args()
     
     # compute carry tables
