@@ -3,10 +3,10 @@
 # job specifications
 #SBATCH --job-name=carry_tables
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=32
+#SBATCH --ntasks-per-node=8
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=12G
-#SBATCH --time=72:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mail-type=begin,end,fail
 #SBATCH --mail-user=cdawes@princeton.edu
 
