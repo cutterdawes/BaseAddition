@@ -26,7 +26,7 @@ class RecursiveTable():
         a, b = g1[0], g2[0]
         t1, t2 = g1[1:], g2[1:]
         z = self[(t1, t2)]
-        res = (self[((a + b) % self.b,), (z,)]  + self[(a,), (b,)]) % self.b
+        res = (self[((a + b) % self.b,), (z,)] + self[(a,), (b,)]) % self.b
         return res
 
 # elements of the form (d1,...,dk) in which addition is performed by recursively applying the carry table
@@ -71,12 +71,12 @@ class RecursiveGrpElt():
         
 #construct table for all tuples of a given length
 def construct_product_table(table, depth):
-    b=len(table)
-    tab=np.zeros((b**depth,b**depth))
-    rt=RecursiveTable(table)
-    for i,v1 in enumerate(product(*[range(b)]*depth)):
-        for j,v2 in enumerate(product(*[range(b)]*depth)):
-            tab[i,j]=rt[(v1,v2)]
+    b = len(table)
+    tab = np.zeros((b**depth, b**depth))
+    rt = RecursiveTable(table)
+    for i, v1 in enumerate(product(*[range(b)]*depth)):
+        for j, v2 in enumerate(product(*[range(b)]*depth)):
+            tab[i, j] = rt[(v1, v2)]
     return tab
 
 
@@ -89,19 +89,19 @@ def assert_cocycle(table, depth=2, sample=False):
         assert (sample <= 3) and (sample <= b**depth), "need 3 <= sample <= b**depth"
         tuples = random.sample(tuples, sample)
     for (v1, v2, v3) in combinations(tuples, 3): #iterate over all tuples of given depth
-        g1=RecursiveGrpElt(v1, table)
-        g2=RecursiveGrpElt(v2, table)
-        g3=RecursiveGrpElt(v3, table)
+        g1 = RecursiveGrpElt(v1, table)
+        g2 = RecursiveGrpElt(v2, table)
+        g3 = RecursiveGrpElt(v3, table)
 
-        s1=(g1+g2)+g3
-        s2=g1+(g2+g3)
-        is_assoc=s1.vals==s2.vals
+        s1 = (g1 + g2) + g3
+        s2 = g1 + (g2 + g3)
+        is_assoc = s1.vals == s2.vals
         if not is_assoc:
             return False
     return True
 
 def construct_table(b, c):
-    basic_table=1*(np.add.outer(np.arange(b),np.arange(b))>=b)
+    basic_table = 1 * (np.add.outer(np.arange(b), np.arange(b)) >= b)
     table = np.zeros((b, b), dtype='int')
     for i in range(b):
         for j in range(b):
