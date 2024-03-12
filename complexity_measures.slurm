@@ -16,4 +16,4 @@ module load anaconda3/2023.9
 conda activate carry_tables
 
 # execute carry_tables.py script
-python complexity_measures.py --depth 4
+python complexity_measures.py --depth $1
