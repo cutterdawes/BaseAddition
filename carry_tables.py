@@ -7,7 +7,7 @@ import numpy as np
 import fn
 
 def pickle_tables(tables, args):
-    directory = '/scratch/network/cdawes' if (args.directory is None) else args.directory
+    directory = '/homes/cdawes/Repo/pickles/bases' if (args.directory is None) else args.directory
     with open(f'{directory}/tables{args.base}.pickle', 'wb') as file:
         pickle.dump(tables, file)
     if not args.parallel:
