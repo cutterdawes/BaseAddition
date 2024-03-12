@@ -108,12 +108,13 @@ def construct_table(b, c):
             table[i, j] = (basic_table[i, j] + c[(i+j)%b] - c[i] - c[j]) % b
     return table
 
-def construct_tables(b, n_per_pass=100, cs=None):
+def construct_tables(b, n_per_pass=100, rank=False, size=False):
 
     # initialize variables
     table_dict = {}
-    if cs is not None:
-        cs = list(product(*[range(b)]*(b-1)))
+    cs = list(product(*[range(b)]*(b-1)))
+    if rank:
+        cs = np.array_split(cs, size)[rank]
 
     # initial pass
     pass_n = 1
