@@ -155,6 +155,28 @@ def construct_tables(b, n_per_pass=100, cs=None):
     return table_dict
 
 
+####################### complexity measures of carry tables ########################
+
+def get_border(table):
+    diff_ax0 = np.diff(table, axis=0, prepend=0)
+    diff_ax1 = np.diff(table, axis=1, prepend=0)
+    border = np.where(diff_ax0 + diff_ax1 != 0, 1, 0)
+    return border
+
+def plot_border(table):
+    border = get_border(table)
+    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+    axes[0].imshow(table, cmap='viridis')
+    axes[1].imshow(border, cmap='viridis')
+
+def get_dim(table):
+    border = get_border(table)
+    N = np.count_nonzero(border)
+    eps_inv = len(border)
+    dim = np.log(N) / np.log(eps_inv)
+    return dim
+
+
 ############################## displaying carry tables #############################
 
 def show_tables(table_dict, b, depth=1):
