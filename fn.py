@@ -113,13 +113,14 @@ def construct_tables(b, n_per_pass=100, rank=False, size=False):
     # initialize variables
     table_dict = {}
     cs = list(product(*[range(b)]*(b-1)))
-    if rank:
+    if rank is not False:
         cs = np.array_split(cs, size)[rank]
 
     # initial pass
     pass_n = 1
     sample = 3 if (len(cs) > n_per_pass) else False
     for c in tqdm(cs, desc=f'Pass {pass_n}'):
+        c = tuple(c)            
         c = (0,) + c
         table = construct_table(b, c)
         if assert_cocycle(table, sample=sample):
@@ -167,8 +168,16 @@ def get_border(table):
 def plot_border(table):
     border = get_border(table)
     fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-    axes[0].imshow(table, cmap='viridis')
-    axes[1].imshow(border, cmap='viridis')
+    im = axes[0].imshow(table, cmap='viridis', vmin=0, vmax=len(table)-1)
+    axes[1].imshow(border, cmap='viridis', vmin=0, vmax=len(table)-1)
+    axes[0].axis('off')
+    axes[1].axis('off')
+    axes[0].set_title('table')
+    axes[1].set_title('border')
+    fig.subplots_adjust(right=0.9)
+    cbar_ax = fig.add_axes([0.94, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(im, cax=cbar_ax)
+    cbar.set_ticks(range(len(table)))
 
 def get_dim(table):
     border = get_border(table)
