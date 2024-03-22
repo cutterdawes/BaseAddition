@@ -39,7 +39,7 @@ def _tuple_to_int(vals, b):
     #convert (d1,...,dk) to a unique integer, where d_i=0,1,...,b-1
     pow = [1]
     while len(pow)<len(vals):
-        pow = [b*pow[0]]+pow
+        pow = [b*pow[0]] + pow
     return sum([n*m for n, m in zip(pow, vals)])
 
 def _interleave_lists(*args):
@@ -90,8 +90,8 @@ class GroupAddition(torch.utils.data.Dataset):
             s = s[-self.depth:]
         #zero pad
         elif len(s) < self.depth:
-            s=[0]*(self.depth-len(s))+s
-        bases = [self.b**i for i in reversed(range(self.depth))]#used for integer representations
+            s = [0] * (self.depth - len(s)) + s
+        bases = [self.b**i for i in reversed(range(self.depth))] #used for integer representations
 
         if self.digit_order == 'reversed':
             v1 = v1[::-1]
