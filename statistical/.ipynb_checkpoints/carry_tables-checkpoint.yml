@@ -1,0 +1,13 @@
+name: carry_tables
+dependencies:
+  - anaconda::numpy
+  - conda-forge::matplotlib
+  - anaconda::more-itertools
+  - conda-forge::mkl_random
+  - conda-forge::python-markdown-math
+  - conda-forge::tqdm
+  - conda-forge::r-sys
+  - conda-forge::pickle5
+  - conda-forge::gh
+  - conda-forge::mpi4py
+  - conda-forge::argparse
