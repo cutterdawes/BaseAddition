@@ -110,6 +110,8 @@ def construct_table(b, c):
 
 def construct_tables(b, n_per_pass=100, rank=False, size=False):
 
+    print(rank, size)
+
     # initialize variables
     table_dict = {}
     cs = list(product(*[range(b)]*(b-1)))

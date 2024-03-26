@@ -17,4 +17,4 @@ module load openmpi/gcc/4.1.2
 conda activate env
 
 # execute carry_tables.py script
-python carry_tables.py -b 7 -p
+python carry_tables.py -b 6 -p
