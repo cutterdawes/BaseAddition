@@ -82,8 +82,9 @@ def construct_product_table(table, depth):
 
 ############################## cocycle-finding functions #############################
 
-def assert_cocycle(table, depth=2):
+def assert_cocycle(table, depth=1):
     b=table.shape[0]
+    depth += 1 # add last digit to check if carry is same
     tuples = list(product(*[range(b)]*depth))
     for (v1, v2, v3) in combinations(tuples, 3): #iterate over all tuples of given depth
 
@@ -118,7 +119,7 @@ def construct_table(dc):
             table[i, j] = (standard_table[i, j] + dc[i][j]) % b
     return table
 
-def construct_tables(b, rank=False, size=False):
+def construct_tables(b, depth=1, rank=False, size=False):
 
     # initialize variables
     table_dict = {}
@@ -127,7 +128,7 @@ def construct_tables(b, rank=False, size=False):
         cs = np.array_split(cs, size)[rank]
 
     # iterate through c's
-    pbar = tqdm(total=b**(b-2))
+    pbar = tqdm(total=b**(b-2), desc='Add cocycles')
     for c in cs:
 
         # construct c and coboundary dc
@@ -135,22 +136,21 @@ def construct_tables(b, rank=False, size=False):
         c = (0,) + c
         dc = construct_coboundary(c)
 
-        # check if coboundary is already in table_dict
-        added = False
-        for o_dc in table_dict.keys():
-            if dc == o_dc:
-                added = True
-                break
-        if added:
-            continue
-
-        # construct associated table, check if cocycle
-        table = construct_table(dc)
-        if assert_cocycle(table):
-            table_dict[dc] = table
-            pbar.update(1)
+        # add associated table to table_dict if not added yet
+        if dc not in table_dict.keys():
+            table_dict[dc] = construct_table(dc)
+            pbar.update()
 
     pbar.close()    
+
+    # if depth > 1, check that each table is a recursive cocycle up to depth
+    if depth > 1:
+        valid_dc = []
+        for dc, table in tqdm(table_dict.items(), desc='Check recursive'):
+            if assert_cocycle(table, depth=depth):
+                valid_dc.append(dc)
+        table_dict = {dc: table_dict[dc] for dc in valid_dc}
+    
     return table_dict
 
 
