@@ -82,33 +82,43 @@ def construct_product_table(table, depth):
 
 ############################## cocycle-finding functions #############################
 
-def assert_cocycle(table, depth=2, sample=False):
+def assert_cocycle(table, depth=2):
     b=table.shape[0]
     tuples = list(product(*[range(b)]*depth))
-    if sample:
-        assert (sample <= 3) and (sample <= b**depth), "need 3 <= sample <= b**depth"
-        tuples = random.sample(tuples, sample)
     for (v1, v2, v3) in combinations(tuples, 3): #iterate over all tuples of given depth
+
+        # convert to group elements
         g1 = RecursiveGrpElt(v1, table)
         g2 = RecursiveGrpElt(v2, table)
         g3 = RecursiveGrpElt(v3, table)
 
+        # check associativity
         s1 = (g1 + g2) + g3
         s2 = g1 + (g2 + g3)
-        is_assoc = s1.vals == s2.vals
+        is_assoc = s1.vals[-depth:] == s2.vals[-depth:]
         if not is_assoc:
             return False
     return True
 
-def construct_table(b, c):
-    basic_table = 1 * (np.add.outer(np.arange(b), np.arange(b)) >= b)
+def construct_coboundary(c):
+    b = len(c)
+    dc = np.zeros((b, b), dtype='int')
+    for i in range(b):
+        for j in range(b):
+            dc[i, j] = (c[i] + c[j] - c[(i+j)%b]) % b
+    dc = tuple(map(tuple, dc))
+    return dc
+
+def construct_table(dc):
+    b = len(dc)
+    standard_table = 1 * (np.add.outer(np.arange(b), np.arange(b)) >= b)
     table = np.zeros((b, b), dtype='int')
     for i in range(b):
         for j in range(b):
-            table[i, j] = (basic_table[i, j] + c[(i+j)%b] - c[i] - c[j]) % b
+            table[i, j] = (standard_table[i, j] + dc[i][j]) % b
     return table
 
-def construct_tables(b, n_per_pass=100, rank=False, size=False):
+def construct_tables(b, rank=False, size=False):
 
     # initialize variables
     table_dict = {}
@@ -116,44 +126,31 @@ def construct_tables(b, n_per_pass=100, rank=False, size=False):
     if rank is not False:
         cs = np.array_split(cs, size)[rank]
 
-    # initial pass
-    pass_n = 1
-    sample = 3 if (len(cs) > n_per_pass) else False
-    for c in tqdm(cs, desc=f'Pass {pass_n}'):
-        c = tuple(c)            
+    # iterate through c's
+    pbar = tqdm(total=b**(b-2))
+    for c in cs:
+
+        # construct c and coboundary dc
+        c = tuple(c)
         c = (0,) + c
-        table = construct_table(b, c)
-        if assert_cocycle(table, sample=sample):
-            added = False
-            for o_cs, o_table in table_dict.items():
-                if np.array_equal(table, o_table):
-                    table_dict.pop(o_cs)
-                    o_cs += (c,)
-                    table_dict[o_cs] = table
-                    added = True
-                    break
-            if not added:
-                c = (c,)
-                table_dict[c] = table
+        dc = construct_coboundary(c)
 
-    # additional passes if necessary
-    while (len(table_dict) > n_per_pass):
-        pass_n += 1
-        valid_c = []
-        for c in tqdm(table_dict.keys(), desc=f'Pass {pass_n}'):
-            if assert_cocycle(table_dict[c], sample=sample):
-                valid_c.append(c)
-        table_dict = {c: table_dict[c] for c in valid_c}
+        # check if coboundary is already in table_dict
+        added = False
+        for o_dc in table_dict.keys():
+            if dc == o_dc:
+                added = True
+                break
+        if added:
+            continue
 
-    # final pass if necessary
-    if sample:
-        pass_n += 1
-        valid_c = []
-        for c in tqdm(table_dict.keys(), desc=f'Pass {pass_n}'):
-            if assert_cocycle(table_dict[c], sample=False):
-                valid_c.append(c)
-        table_dict = {c: table_dict[c] for c in valid_c}
-        
+        # construct associated table, check if cocycle
+        table = construct_table(dc)
+        if assert_cocycle(table):
+            table_dict[dc] = table
+            pbar.update(1)
+
+    pbar.close()    
     return table_dict
 
 
@@ -194,7 +191,7 @@ def show_tables(table_dict, b, depth=1):
     # create fig, axes
     n = len(table_dict)
     w = int(np.ceil(np.sqrt(n)))
-    fig, axes = plt.subplots(math.ceil(n / w), w, figsize=(2*w, 2*n//w))
+    fig, axes = plt.subplots(w, math.ceil(n / w), figsize=(2*w, 2*n//w))
     try:
         axes = axes.flatten()
     except:
@@ -202,18 +199,24 @@ def show_tables(table_dict, b, depth=1):
     
     # iterate through table_dict
     i = 0
-    for c in table_dict.keys():
+    cs = list(product(*[range(b)]*(b-1)))
+    for dc, table in table_dict.items():
 
-        # get c and table, construct product table if specified
-        table = table_dict[c]
+        # find simplest c associated with dc
+        for c in cs:
+            c = tuple(c)
+            c = (0,) + c
+            if construct_coboundary(c) == dc:
+                break
+
+        # construct product table if specified
         if (depth > 1):
             table = construct_product_table(table, depth)
 
         # display image, increment i
         ax = axes[i]
         im = ax.imshow(table, cmap='viridis', vmin=0, vmax=b-1)
-        c = str(sorted(c)[0])
-        ax.set_title('c = ' + c, fontsize=10)
+        ax.set_title(f'c = {str(c)}', fontsize=10)
         i += 1
 
     # turn off axes
@@ -223,5 +226,5 @@ def show_tables(table_dict, b, depth=1):
     # add colorbar
     fig.subplots_adjust(right=0.9)
     cbar_ax = fig.add_axes([0.94, 0.15, 0.05, 0.7])
-    cbar = fig.colorbar(im, cax=cbar_ax)
+    cbar = fig.colorbar(im, cax=cbar_ax, aspect=80/w)
     cbar.set_ticks(range(b))
