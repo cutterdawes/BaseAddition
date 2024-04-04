@@ -1,0 +1,14 @@
+.DS_Store
+__pycache__/base.cpython-38.pyc
+__pycache__/fn.cpython-38.pyc
+__pycache__/functions.cpython-38.pyc
+statistical/.ipynb_checkpoints/statistical-checkpoint.ipynb
+ml/__pycache__/addition_dataset.cpython-38.pyc
+ml/.ipynb_checkpoints/ml-checkpoint.ipynb
+.ipynb_checkpoints/carry_tables-checkpoint.ipynb
+.ipynb_checkpoints/carry_tables-checkpoint.py
+.ipynb_checkpoints/carry_tables-checkpoint.slurm
+.ipynb_checkpoints/carry_tables-checkpoint.yml
+.ipynb_checkpoints/complexity_measures-checkpoint.py
+.ipynb_checkpoints/fn-checkpoint.py
+.ipynb_checkpoints/README-checkpoint.md
