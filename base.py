@@ -1,6 +1,6 @@
 import numpy as np
 
-# Simon's version of the recursive rule for carrying
+# Recursive rule for carrying
 def recursive_carry_rule(carry_table, n, m):
     carried_tail = carry_table[n[1:], m[1:]]
     return (carry_table[n[0], m[0]] + carry_table[(n[0] + m[0]) % carry_table.b, carried_tail]) % carry_table.b

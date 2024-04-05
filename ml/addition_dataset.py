@@ -34,6 +34,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 import fn
+from base import BaseElt
 
 def _tuple_to_int(vals, b):
     #convert (d1,...,dk) to a unique integer, where d_i=0,1,...,b-1
@@ -82,8 +83,8 @@ class GroupAddition(torch.utils.data.Dataset):
             v2 = np.random.choice(self.b, size=self.depth)
             if self.ids is None or _tuple_to_int(v2, self.b) in self.ids:
                 break
-        g1 = fn.RecursiveGrpElt(tuple(v1), self.carry_table)
-        g2 = fn.RecursiveGrpElt(tuple(v2), self.carry_table)
+        g1 = BaseElt(tuple(v1), self.carry_table)
+        g2 = BaseElt(tuple(v2), self.carry_table)
         s = list((g1 + g2).vals)
         #only consider cyclic addition
         if len(s) > self.depth:

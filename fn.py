@@ -1,83 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import product, combinations
-import random
 import math
 from tqdm.autonotebook import tqdm
-
-
-##################### base representation classes and functions #############################
-
-class RecursiveTable():
-    def __init__(self, carry_table):
-        self.b = len(carry_table)
-        self.carry_table = carry_table
-        # prev_level should be either a table (i.e. array) or RecursiveTable
-
-    def __getitem__(self, elts):
-        g1, g2 = elts
-        if len(g1) != len(g2):
-            zp = max(len(g1), len(g2))
-            v1 = tuple([0] * (zp - len(g1)) + list(g1))
-            v2 = tuple([0] * (zp - len(g2)) + list(g2))
-            return self[(v1, v2)]
-        if len(g1) == 1:
-            return self.carry_table[g1[0], g2[0]]
-        a, b = g1[0], g2[0]
-        t1, t2 = g1[1:], g2[1:]
-        z = self[(t1, t2)]
-        res = (self[((a + b) % self.b,), (z,)] + self[(a,), (b,)]) % self.b
-        return res
-
-# elements of the form (d1,...,dk) in which addition is performed by recursively applying the carry table
-class RecursiveGrpElt():
-    def __init__(self, vals, carry_table):
-        self.carry_table = carry_table
-        self.vals = vals
-        self.rt = RecursiveTable(carry_table)
-        self.b = len(carry_table)
-
-    def __add__(self, other):
-        if len(self.vals) != len(other.vals):
-            # zero pad if necessary
-            zp = max(len(self.vals), len(other.vals))
-            v1 = [0] * (zp - len(self.vals)) + list(self.vals)
-            v2 = [0] * (zp - len(other.vals)) + list(other.vals)
-            g1 = RecursiveGrpElt(tuple(v1), self.carry_table)
-            g2 = RecursiveGrpElt(tuple(v2), self.carry_table)
-            return g1 + g2
-        else:
-            if len(self.vals) == 1:
-                carried = self.carry_table[self.vals[0], other.vals[0]]
-                new_vals = [carried] + [(self.vals[0] + other.vals[0]) % self.b]
-                if carried == 0:
-                    new_vals = new_vals[1:]
-                return RecursiveGrpElt(tuple(new_vals), self.carry_table)
-
-            # carried element from the tail
-            z = self.rt[(self.vals[1:], other.vals[1:])]
-            # overall carried element
-            carried = self.carry_table[self.vals[0], other.vals[0]]
-            carried += self.carry_table[(self.vals[0] + other.vals[0]) % self.b, z]
-            carried = (carried) % self.b
-            new_a = (self.vals[0] + other.vals[0] + z) % self.b
-            g1 = RecursiveGrpElt(self.vals[1:], self.carry_table)
-            g2 = RecursiveGrpElt(other.vals[1:], self.carry_table)
-            new_tail = list((g1 + g2).vals)[-len(self.vals[1:]):]
-            new_vals = tuple([carried] + [new_a] + new_tail)
-            if carried == 0:
-                new_vals = new_vals[1:]
-            return RecursiveGrpElt(new_vals, self.carry_table)
-        
-#construct table for all tuples of a given length
-def construct_product_table(table, depth):
-    b = len(table)
-    tab = np.zeros((b**depth, b**depth))
-    rt = RecursiveTable(table)
-    for i, v1 in enumerate(product(*[range(b)]*depth)):
-        for j, v2 in enumerate(product(*[range(b)]*depth)):
-            tab[i, j] = rt[(v1, v2)]
-    return tab
+from base import CarryTable, BaseElt
 
 
 ############################## cocycle-finding functions #############################
@@ -86,16 +12,16 @@ def assert_cocycle(table, depth=1):
     b=table.shape[0]
     depth += 1 # add last digit to check if carry is same
     tuples = list(product(*[range(b)]*depth))
-    for (v1, v2, v3) in combinations(tuples, 3): #iterate over all tuples of given depth
+    for (n, m, p) in combinations(tuples, 3): #iterate over all tuples of given depth
 
         # convert to group elements
-        g1 = RecursiveGrpElt(v1, table)
-        g2 = RecursiveGrpElt(v2, table)
-        g3 = RecursiveGrpElt(v3, table)
+        n = BaseElt(n, table)
+        m = BaseElt(m, table)
+        p = BaseElt(p, table)
 
         # check associativity
-        s1 = (g1 + g2) + g3
-        s2 = g1 + (g2 + g3)
+        s1 = (n + m) + p
+        s2 = n + (m + p)
         is_assoc = s1.vals[-depth:] == s2.vals[-depth:]
         if not is_assoc:
             return False
@@ -118,6 +44,15 @@ def construct_table(dc):
         for j in range(b):
             table[i, j] = (standard_table[i, j] + dc[i][j]) % b
     return table
+
+def construct_product_table(table, depth):
+    b = len(table)
+    product_table = np.zeros((b**depth, b**depth))
+    table = CarryTable(table)
+    for i, n in enumerate(product(*[range(b)]*depth)):
+        for j, m in enumerate(product(*[range(b)]*depth)):
+            product_table[i, j] = table[n, m]
+    return product_table
 
 def construct_tables(b, depth=1, rank=False, size=False):
 
