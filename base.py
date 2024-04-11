@@ -1,8 +1,10 @@
 import numpy as np
 
 # Recursive rule for carrying
-def recursive_carry_rule(carry_table, n, m):
+def recursive_carry_rule(carry_table, n: tuple, m: tuple):
     carried_tail = carry_table[n[1:], m[1:]]
+    if type(carried_tail) in (int, np.int64):
+        carried_tail = (carried_tail,)
     return (carry_table[n[0], m[0]] + carry_table[(n[0] + m[0]) % carry_table.b, carried_tail]) % carry_table.b
 
 class CarryTable():
@@ -69,27 +71,22 @@ class BaseElt():
 
         # 1-digit case
         if len(n) == 1:
-            carried = self.carry_table[n[0], m[0]]
             s = (n[0] + m[0]) % self.b
-            if carried != 0:
-                s = (carried,) + (s,)
-        
+
         # general case
         else:
-            # get values and carried of tail
+            # add first digit
+            s_head = (n[0] + m[0]) % self.b
+
+            # recursively other digits
             n_tail = BaseElt(n[1:], self.carry_table)
             m_tail = BaseElt(m[1:], self.carry_table)
             s_tail = (n_tail + m_tail).vals
-            s_tail = s_tail[-len(n_tail):] if len(s_tail) > 1 else s_tail
-            carried_tail = self.carry_table[n[1:], m[1:]]
 
-            # get value and carried of head
-            s_head = (n[0] + m[0] + carried_tail) % self.b
-            carried = recursive_carry_rule(self.carry_table, n, m)
+            # get carry from recursive rule
+            carried = self.carry_table[n[1:], m[1:]]
 
-            # add head and tail and carried (if applicable)
-            s = (s_head,) + s_tail
-            if carried != 0:
-                s = (carried,) + s
+            # combine to total sum
+            s = ((s_head + carried) % self.b,) + s_tail
 
         return BaseElt(s, self.carry_table)
