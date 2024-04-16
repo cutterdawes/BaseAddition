@@ -25,11 +25,9 @@ def main():
     # train model for each table
     all_learning_metrics = {}
     for dc, table in tables.items():
-    
-        # get data
-        num_passes = 2500
-        
+            
         # initialize learning metrics
+        num_passes = 2500
         avg_losses = np.zeros(int(num_passes / 10))
         avg_training_accs = np.zeros(int(num_passes / 10))
         avg_testing_accs = np.zeros(int(num_passes / 10))
@@ -39,7 +37,7 @@ def main():
         for _ in range(rollouts):
 
             # initialize model and dataloaders
-            model = LSTM(args.base, 2)
+            model = LSTM(args.base, 1)
             training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 6, table, split_type='OOD', split_depth=3)
 
             # evaluate model and store output

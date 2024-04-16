@@ -38,6 +38,6 @@ def prepare(b, depth, table, batch_size=16, split_type='interpolate', split_rati
     
     # create testing dataset and dataloader
     testing_dataset = GroupAddition(table, depth, ids=heldout_ids, interleaved=True, digit_order='reversed')
-    testing_dataloader = torch.utils.data.DataLoader(testing_dataset)
+    testing_dataloader = torch.utils.data.DataLoader(testing_dataset, shuffle=True)
 
     return training_dataloader, testing_dataloader

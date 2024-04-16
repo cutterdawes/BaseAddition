@@ -8,10 +8,13 @@ from base import CarryTable, BaseElt
 
 ############################## cocycle-finding functions #############################
 
-def assert_cocycle(table, depth=1):
+def assert_cocycle(table, depth=1, sample=False):
     b = table.shape[0]
     depth += 1 # add last digit to check if carry is same
     tuples = list(product(*[range(b)]*depth))
+    if sample:
+        assert (sample <= 3) and (sample <= b**depth), 'need 3 <= sample <= b**depth'
+        tuples = random.sample(tuples, sample)
     for (n, m, p) in combinations(tuples, 3): #iterate over all tuples of given depth
 
         # convert to group elements
@@ -54,14 +57,12 @@ def construct_product_table(table, depth):
             product_table[i, j] = table[n, m]
     return product_table
 
-def construct_tables(b, depth=1, rank=False, size=False):
+def construct_tables(b, depth=1, sample=False):
 
     # initialize variables
     table_dict = {}
     cs = list(product(*[range(b)]*(b-1)))
     valid_dc = []
-    if rank is not False:
-        cs = np.array_split(cs, size)[rank]
 
     # iterate through c's
     pbar = tqdm(total=b**(b-2))
@@ -79,7 +80,7 @@ def construct_tables(b, depth=1, rank=False, size=False):
 
             # if depth > 1, check if table is a recursive cocycle up to depth
             if depth > 1:
-                if assert_cocycle(table, depth=depth):
+                if assert_cocycle(table, depth=depth, sample=False):
                     valid_dc.append(dc)
 
             pbar.update()
