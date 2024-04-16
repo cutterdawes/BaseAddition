@@ -33,7 +33,6 @@ import torch
 import numpy as np
 import sys
 sys.path.append('../')
-import fn
 from base import BaseElt
 
 def _tuple_to_int(vals, b):
