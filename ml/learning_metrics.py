@@ -27,9 +27,9 @@ def main():
         training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 3, table, split_type='interpolate', split_depth=2)
         
         # initialize learning metrics
-        avg_losses = np.zeros(num_passes / 10)
-        avg_training_accs = np.zeros(num_passes / 10)
-        avg_testing_accs = np.zeros(num_passes / 10)
+        avg_losses = np.zeros(int(num_passes / 10))
+        avg_training_accs = np.zeros(int(num_passes / 10))
+        avg_testing_accs = np.zeros(int(num_passes / 10))
 
         # evaluate model multiple times, add to averages
         rollouts = 3
