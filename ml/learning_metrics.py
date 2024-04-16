@@ -32,13 +32,13 @@ def main():
         avg_training_accs = np.zeros(int(num_passes / 10))
         avg_testing_accs = np.zeros(int(num_passes / 10))
 
-        # evaluate model multiple times, add to averages
-        rollouts = 10
+        # evaluate model multiple times, average metrics
+        rollouts = 5
         for _ in range(rollouts):
 
             # initialize model and dataloaders
             model = LSTM(args.base, 1)
-            training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 6, table, split_type='OOD', split_depth=3)
+            training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 6, table, split_type='OOD', split_depth=3, sample=True)
 
             # evaluate model and store output
             losses, training_accs, testing_accs = eval.eval(model, training_dataloader, testing_dataloader, num_passes=num_passes, print_loss_and_acc=False)

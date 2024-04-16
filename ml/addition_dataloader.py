@@ -24,13 +24,15 @@ def _get_ids(b, depth, split_type, split_ratio=0.9, split_depth=-1):
     return ids
 
 
-def prepare(b, depth, table, batch_size=16, split_type='interpolate', split_ratio=0.9, split_depth=-1):
+def prepare(b, depth, table, batch_size=16, split_type='interpolate', split_ratio=0.9, split_depth=-1, sample=False):
     '''return training and testing dataloader objects for learning addition'''
     
     # get indices of training and testing data
     N = b**depth
     ids = _get_ids(b, depth, split_type, split_ratio, split_depth)
     heldout_ids = set(range(N)) - set(ids)
+    if sample:
+        heldout_ids = random.sample(heldout_ids, len(ids))
     
     # create training dataset and dataloader
     training_dataset = GroupAddition(table, depth, ids=ids, interleaved=True, digit_order='reversed')

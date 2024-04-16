@@ -1,6 +1,7 @@
 import numpy as np
 # import matplotlib.pyplot as plt
 from itertools import product, combinations
+import random
 import math
 from tqdm.autonotebook import tqdm
 from base import CarryTable, BaseElt
@@ -13,7 +14,7 @@ def assert_cocycle(table, depth=1, sample=False):
     depth += 1 # add last digit to check if carry is same
     tuples = list(product(*[range(b)]*depth))
     if sample:
-        assert (sample <= 3) and (sample <= b**depth), 'need 3 <= sample <= b**depth'
+        assert (sample >= 3) and (sample <= b**depth), 'need 3 <= sample <= b**depth'
         tuples = random.sample(tuples, sample)
     for (n, m, p) in combinations(tuples, 3): #iterate over all tuples of given depth
 
@@ -80,7 +81,7 @@ def construct_tables(b, depth=1, sample=False):
 
             # if depth > 1, check if table is a recursive cocycle up to depth
             if depth > 1:
-                if assert_cocycle(table, depth=depth, sample=False):
+                if assert_cocycle(table, depth=depth, sample=sample):
                     valid_dc.append(dc)
 
             pbar.update()
