@@ -40,7 +40,7 @@ def main():
 
             # initialize model and dataloaders
             model = LSTM(args.base, 2)
-            training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 3, table, split_type='OOD', split_depth=2)
+            training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 6, table, split_type='OOD', split_depth=3)
 
             # evaluate model and store output
             losses, training_accs, testing_accs = eval.eval(model, training_dataloader, testing_dataloader, num_passes=num_passes, print_loss_and_acc=False)
