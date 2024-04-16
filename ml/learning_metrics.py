@@ -23,12 +23,13 @@ def main():
     for dc, table in tables.items():
     
         # get data
-        training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 3, table, split_type='interpolate', split_ratio=0.9)
+        num_passes = 2000
+        training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 3, table, split_type='interpolate', split_depth=2)
         
         # initialize learning metrics
-        avg_losses = np.zeros(100)
-        avg_training_accs = np.zeros(100)
-        avg_testing_accs = np.zeros(100)
+        avg_losses = np.zeros(num_passes / 10)
+        avg_training_accs = np.zeros(num_passes / 10)
+        avg_testing_accs = np.zeros(num_passes / 10)
 
         # evaluate model multiple times, add to averages
         rollouts = 3
@@ -38,7 +39,7 @@ def main():
             model = LSTM(args.base, 2)
 
             # evaluate model and store output
-            losses, training_accs, testing_accs = eval.eval(model, training_dataloader, testing_dataloader, num_passes=1000, print_loss_and_acc=False)
+            losses, training_accs, testing_accs = eval.eval(model, training_dataloader, testing_dataloader, num_passes=num_passes, print_loss_and_acc=False)
             avg_losses += (np.array(losses) / rollouts)
             avg_training_accs += (np.array(training_accs) / rollouts)
             avg_testing_accs += (np.array(testing_accs) / rollouts)
