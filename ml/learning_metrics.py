@@ -4,6 +4,9 @@ import numpy as np
 import addition_dataloader
 import eval
 from LSTM import LSTM
+import sys
+sys.path.append('../')
+import fn
 
 
 def main():
@@ -14,9 +17,10 @@ def main():
     args = parser.parse_args()
 
     # get carry tables
-    with open('../pickles/all_tables.pickle', 'rb') as f:
-        all_tables = pickle.load(f)
-    tables = all_tables[args.base]
+    # with open('../pickles/all_tables.pickle', 'rb') as f:
+    #     all_tables = pickle.load(f)
+    # tables = all_tables[args.base]
+    tables = fn.construct_tables(args.base)
     
     # train model for each table
     all_learning_metrics = {}
@@ -24,7 +28,7 @@ def main():
     
         # get data
         num_passes = 2000
-        training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 3, table, split_type='interpolate', split_depth=2)
+        training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 3, table, split_type='OOD', split_depth=2)
         
         # initialize learning metrics
         avg_losses = np.zeros(int(num_passes / 10))
@@ -32,7 +36,7 @@ def main():
         avg_testing_accs = np.zeros(int(num_passes / 10))
 
         # evaluate model multiple times, add to averages
-        rollouts = 3
+        rollouts = 5
         for _ in range(rollouts):
 
             # initialize model

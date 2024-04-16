@@ -12,3 +12,7 @@ ml/.ipynb_checkpoints/ml-checkpoint.ipynb
 .ipynb_checkpoints/complexity_measures-checkpoint.py
 .ipynb_checkpoints/fn-checkpoint.py
 .ipynb_checkpoints/README-checkpoint.md
+ml/__pycache__/addition_dataloader.cpython-38.pyc
+ml/__pycache__/data.cpython-38.pyc
+ml/__pycache__/eval.cpython-38.pyc
+ml/__pycache__/LSTM.cpython-38.pyc
