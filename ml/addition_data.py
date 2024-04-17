@@ -169,7 +169,8 @@ def prepare(
     split_type: str = 'interpolate',
     split_ratio: float = 0.9,
     split_depth: int = -1,
-    sample: bool = False
+    sample: bool = False,
+    num_workers: int = 1
 ) -> Tuple[DataLoader, DataLoader]:
     '''return training and testing dataloader objects for learning addition'''
     
@@ -182,10 +183,10 @@ def prepare(
     
     # create training dataset and dataloader
     training_dataset = GroupAddition(table, depth, ids=ids, interleaved=True, digit_order='reversed')
-    training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
+    training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     
     # create testing dataset and dataloader
     testing_dataset = GroupAddition(table, depth, ids=heldout_ids, interleaved=True, digit_order='reversed')
-    testing_dataloader = DataLoader(testing_dataset, shuffle=True)
+    testing_dataloader = DataLoader(testing_dataset, shuffle=True, num_workers=num_workers)
 
     return training_dataloader, testing_dataloader
