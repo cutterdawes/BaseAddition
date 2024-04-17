@@ -15,7 +15,7 @@ def main():
     args = parser.parse_args()
 
     # get carry tables
-    with open('../pickles/carry_tables/all_tables_d1_b1-6.pickle', 'rb') as f:
+    with open('../pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
         all_tables = pickle.load(f)
     tables = all_tables[args.base]
     
