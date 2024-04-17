@@ -76,8 +76,13 @@ def test(
         total_samples = 0
         for (X, s, ids) in dataloader:
             
+            # send tensors to device
+            X = X.to(device)
+            s = s.to(device)
+            ids = ids.to(device)
+
             # forward pass
-            s_out = model.predict(X.to(device), ids.to(device))
+            s_out = model.predict(X, ids).to(device)
     
             # check if correct, add to total samples
             total_correct += ((s_out == s).sum(1) == s.shape[1]).sum().item()
@@ -128,10 +133,15 @@ def eval(
 
         # optimize over training data
         for (X, s, ids) in training_dataloader:
-        
+
+            # send tensors to device
+            X = X.to(device)
+            s = s.to(device)
+            ids = ids.to(device)
+
             # compute loss
-            s_out = model.logits(X.to(device), ids.to(device))
-            loss = criterion(s_out.to(device), s.to(device))
+            s_out = model.logits(X, ids).to(device)
+            loss = criterion(s_out, s)
     
             # zero gradients, perform a backward pass, and update the weights
             optimizer.zero_grad()
