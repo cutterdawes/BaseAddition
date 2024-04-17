@@ -33,7 +33,7 @@ def main():
     training_dataloader, testing_dataloader = addition_data.prepare(args.base, 6, table, split_type='OOD', split_depth=3, sample=True, num_workers=num_workers)
 
     # evaluate model and store output
-    losses, training_accs, testing_accs = addition_eval.eval(model, training_dataloader, testing_dataloader, device, num_passes=2500, print_loss_and_acc=False)
+    __ = addition_eval.eval(model, training_dataloader, testing_dataloader, device, num_passes=500, print_loss_and_acc=True)
 
 
 if __name__ == '__main__':

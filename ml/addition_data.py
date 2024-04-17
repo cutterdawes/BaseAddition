@@ -40,12 +40,13 @@ sys.path.append('../')
 from base import CarryTable, BaseElt
 
 
-def _tuple_to_int(vals, b):
-    #convert (d1,...,dk) to a unique integer, where d_i=0,1,...,b-1
-    pow = [1]
-    while len(pow)<len(vals):
-        pow = [b*pow[0]] + pow
-    return sum([n*m for n, m in zip(pow, vals)])
+def _int_to_tuple(n, b):
+    nb = ()
+    while n:
+        nj = n % b
+        nb += (nj,)
+        n //= b
+    return nb[::-1]
 
 
 def _interleave_lists(*args):
@@ -73,7 +74,7 @@ def _get_ids(b, depth, split_type, split_ratio=0.9, split_depth=-1):
     return ids
 
 
-class GroupAddition(Dataset):
+class BaseAddition(Dataset):
     def __init__(
         self,
         carry_table: Union[np.ndarray, CarryTable],
@@ -111,33 +112,37 @@ class GroupAddition(Dataset):
         self.depth = depth
 
     def __getitem__(self, idx: int):
-        while True:
-            v1 = np.random.choice(self.b, size=self.depth)
-            if self.ids is None or _tuple_to_int(v1, self.b) in self.ids:
-                break
-        while True:
-            v2 = np.random.choice(self.b, size=self.depth)
-            if self.ids is None or _tuple_to_int(v2, self.b) in self.ids:
-                break
-        g1 = BaseElt(tuple(v1), self.carry_table)
-        g2 = BaseElt(tuple(v2), self.carry_table)
-        s = list((g1 + g2).vals)
-        #only consider cyclic addition
-        if len(s) > self.depth:
-            s = s[-self.depth:]
-        #zero pad
-        elif len(s) < self.depth:
-            s = [0] * (self.depth - len(s)) + s
+
+        # get numbers to add
+        n = _int_to_tuple(np.random.choice(self.ids), self.b)
+        m = _int_to_tuple(np.random.choice(self.ids), self.b)
+        if len(n) != self.depth:
+            zp = self.depth - len(n)
+            n = (0,) * zp + n
+        if len(m) != self.depth:
+            zp = self.depth - len(m)
+            m = (0,) * zp + m
+
+        # get sum of n and m
+        n = BaseElt(tuple(n), self.carry_table)
+        m = BaseElt(tuple(m), self.carry_table)
+        s = n + m
+
+        # convert back to tuples
+        s = s.vals
+        n = n.vals
+        m = m.vals
+
         bases = [self.b**i for i in reversed(range(self.depth))] #used for integer representations
 
         if self.digit_order == 'reversed':
-            v1 = v1[::-1]
-            v2 = v2[::-1]
+            n = n[::-1]
+            m = m[::-1]
             s = s[::-1]
             bases = bases[::-1]
 
         if self.interleaved:
-            inp = _interleave_lists(v1, v2)+[self.b] + [-1] * len(v1) if self.ans_at_end else _interleave_lists(v1, v2, [-1]*len(v1))
+            inp = _interleave_lists(n, m)+[self.b] + [-1] * len(n) if self.ans_at_end else _interleave_lists(n, m, [-1]*len(n))
             ids = torch.Tensor([i for i, x in enumerate(inp) if x==-1]).long()
             if self.input_format == 'onehot':
                 X = torch.zeros((len(inp), self.b + (1 if self.ans_at_end else 0)))
@@ -148,7 +153,7 @@ class GroupAddition(Dataset):
                 raise ValueError('')
             return X, torch.Tensor(s).long(), ids
         else:
-            inp = np.array(list(v1) + [self.b] + list(v2))
+            inp = np.array(list(n) + [self.b] + list(m))
             if self.input_format == 'onehot':
                 #convert to one-hots, with empty entries for filling in the answer
                 X=torch.zeros((len(inp) + len(s), self.b + 1))
@@ -159,8 +164,9 @@ class GroupAddition(Dataset):
             #positions with placeholders
             ids = torch.arange(len(inp), len(X))
             return X, torch.Tensor(s).long(), ids
-        
 
+
+# @profile
 def prepare(
     b: int,
     depth: int,
@@ -182,11 +188,11 @@ def prepare(
         heldout_ids = random.sample(heldout_ids, len(ids))
     
     # create training dataset and dataloader
-    training_dataset = GroupAddition(table, depth, ids=ids, interleaved=True, digit_order='reversed')
-    training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    training_dataset = BaseAddition(table, depth, ids=ids, interleaved=True, digit_order='reversed')
+    training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
     
     # create testing dataset and dataloader
-    testing_dataset = GroupAddition(table, depth, ids=heldout_ids, interleaved=True, digit_order='reversed')
-    testing_dataloader = DataLoader(testing_dataset, shuffle=True, num_workers=num_workers)
+    testing_dataset = BaseAddition(table, depth, ids=heldout_ids, interleaved=True, digit_order='reversed')
+    testing_dataloader = DataLoader(testing_dataset, shuffle=True)
 
     return training_dataloader, testing_dataloader
