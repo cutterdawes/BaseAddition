@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics_noGPU
+#SBATCH --job-name=learning_metrics_32workers
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=4G
-# no #SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem-per-cpu=1G
+#SBATCH --gres=gpu:1
 #SBATCH --time=01:00:00
 #SBATCH --mail-type=begin,end,fail
 #SBATCH --mail-user=cdawes@princeton.edu
