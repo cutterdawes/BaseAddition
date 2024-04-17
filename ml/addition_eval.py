@@ -57,7 +57,6 @@ def train(
     return losses
 
 
-@profile
 def test(
     model: LSTM,
     dataloader: DataLoader,
@@ -99,7 +98,6 @@ def test(
             return accuracy
 
 
-@profile
 def eval(
     model: LSTM,
     training_dataloader: DataLoader,

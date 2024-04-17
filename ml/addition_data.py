@@ -166,7 +166,6 @@ class BaseAddition(Dataset):
             return X, torch.Tensor(s).long(), ids
 
 
-# @profile
 def prepare(
     b: int,
     depth: int,
@@ -189,10 +188,10 @@ def prepare(
     
     # create training dataset and dataloader
     training_dataset = BaseAddition(table, depth, ids=ids, interleaved=True, digit_order='reversed')
-    training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
+    training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True) #****** num_workers not passed
     
     # create testing dataset and dataloader
     testing_dataset = BaseAddition(table, depth, ids=heldout_ids, interleaved=True, digit_order='reversed')
-    testing_dataloader = DataLoader(testing_dataset, shuffle=True)
+    testing_dataloader = DataLoader(testing_dataset, shuffle=True) #****** num_workers not passed
 
     return training_dataloader, testing_dataloader
