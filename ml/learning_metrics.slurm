@@ -18,4 +18,4 @@ module load openmpi/gcc/4.1.2
 conda activate env
 
 # execute carry_tables.py script
-kernprof -l learning_metrics.py -b $1 -n 4
+python learning_metrics.py -b $1 -n 4
