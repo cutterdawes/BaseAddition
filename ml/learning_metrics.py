@@ -53,9 +53,9 @@ def main():
         all_learning_metrics[dc] = learning_metrics
     
     # pickle all learning metrics
-    directory = '/home/cdawes/Repo/pickles' if (args.directory is None) else args.directory
-    with open(f'{directory}/learning_metrics{args.base}.pickle', 'wb') as f:
-        pickle.dump(all_learning_metrics, f)
+    # directory = '/home/cdawes/Repo/pickles' if (args.directory is None) else args.directory
+    # with open(f'{directory}/learning_metrics{args.base}.pickle', 'wb') as f:
+    #     pickle.dump(all_learning_metrics, f)
 
 
 if __name__ == '__main__':
