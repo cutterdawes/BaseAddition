@@ -22,7 +22,7 @@ def main():
     
     # specify torch device (set to GPU if available), set number of CPU workers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    num_workers = 1 if (args.num_workers is None) else args.num_workers
+    num_workers = 0 if (args.num_workers is None) else args.num_workers
 
     # train model for each table
     all_learning_metrics = {}
@@ -35,7 +35,7 @@ def main():
         avg_testing_accs = np.zeros(int(num_passes / 10))
 
         # evaluate model multiple times, average metrics
-        rollouts = 5
+        rollouts = 10
         for _ in range(rollouts):
 
             # initialize model and dataloaders
