@@ -30,10 +30,15 @@ ans_at_end: False
 '''
 
 import torch
+from torch.utils.data import Dataset, DataLoader
+from typing import Tuple, List, Union
 import numpy as np
+import random
+import math
 import sys
 sys.path.append('../')
-from base import BaseElt
+from base import CarryTable, BaseElt
+
 
 def _tuple_to_int(vals, b):
     #convert (d1,...,dk) to a unique integer, where d_i=0,1,...,b-1
@@ -42,12 +47,44 @@ def _tuple_to_int(vals, b):
         pow = [b*pow[0]] + pow
     return sum([n*m for n, m in zip(pow, vals)])
 
+
 def _interleave_lists(*args):
     #https://stackoverflow.com/questions/7946798/interleave-multiple-lists-of-the-same-length-in-python
     return [val for pair in zip(*args) for val in pair]
 
-class GroupAddition(torch.utils.data.Dataset):
-    def __init__(self, carry_table, depth, ids, debug_mode=False, digit_order='standard', input_format='onehot', interleaved=False, ans_at_end=False):
+
+def _get_ids(b, depth, split_type, split_ratio=0.9, split_depth=-1):
+    '''return ids corresponding to training dataloader depending on generalization type'''
+
+    # check inputs, initialize variables
+    assert split_type in ['interpolate', 'OOD'], 'invalid type'
+    N = b**depth
+
+    # training ids if testing interpolation generalization
+    if split_type == 'interpolate':
+        assert (0 < split_ratio < 1), 'invalid split'
+        ids = random.sample(range(N), math.ceil(split_ratio * N))
+
+    # training ids if testing O.O.D. generalization
+    elif split_type == 'OOD':
+        assert (0 < split_depth <= depth), 'invalid sample_depth'
+        ids = list(range(b**split_depth))
+
+    return ids
+
+
+class GroupAddition(Dataset):
+    def __init__(
+        self,
+        carry_table: Union[np.ndarray, CarryTable],
+        depth: int,
+        ids: List,
+        debug_mode: bool = False,
+        digit_order: str = 'standard',
+        input_format: str = 'onehot',
+        interleaved: bool = False,
+        ans_at_end: bool = False
+    ):
         self.carry_table = carry_table
         self.depth = depth #number of components in vector
         self.b = len(carry_table)
@@ -70,10 +107,10 @@ class GroupAddition(torch.utils.data.Dataset):
     def __len__(self):
         return self.len
     
-    def set_depth(self,depth):
+    def set_depth(self, depth: int):
         self.depth = depth
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         while True:
             v1 = np.random.choice(self.b, size=self.depth)
             if self.ids is None or _tuple_to_int(v1, self.b) in self.ids:
@@ -122,3 +159,33 @@ class GroupAddition(torch.utils.data.Dataset):
             #positions with placeholders
             ids = torch.arange(len(inp), len(X))
             return X, torch.Tensor(s).long(), ids
+        
+
+def prepare(
+    b: int,
+    depth: int,
+    table: Union[np.ndarray, CarryTable],
+    batch_size: int = 16,
+    split_type: str = 'interpolate',
+    split_ratio: float = 0.9,
+    split_depth: int = -1,
+    sample: bool = False
+) -> Tuple[DataLoader, DataLoader]:
+    '''return training and testing dataloader objects for learning addition'''
+    
+    # get indices of training and testing data
+    N = b**depth
+    ids = _get_ids(b, depth, split_type, split_ratio, split_depth)
+    heldout_ids = set(range(N)) - set(ids)
+    if sample:
+        heldout_ids = random.sample(heldout_ids, len(ids))
+    
+    # create training dataset and dataloader
+    training_dataset = GroupAddition(table, depth, ids=ids, interleaved=True, digit_order='reversed')
+    training_dataloader = DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
+    
+    # create testing dataset and dataloader
+    testing_dataset = GroupAddition(table, depth, ids=heldout_ids, interleaved=True, digit_order='reversed')
+    testing_dataloader = DataLoader(testing_dataset, shuffle=True)
+
+    return training_dataloader, testing_dataloader

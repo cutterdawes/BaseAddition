@@ -1,13 +1,15 @@
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 from LSTM import LSTM
+from typing import Tuple, List, Union
 
 
 class CrossEntropy(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, s_out, s):
+    def forward(self, s_out: torch.Tensor, s: torch.Tensor):
         cross_entropy = nn.CrossEntropyLoss()
         s_out = s_out.reshape(-1, s_out.shape[2])
         s = s.reshape(-1)
@@ -15,7 +17,13 @@ class CrossEntropy(nn.Module):
         return loss
 
 
-def train(model: LSTM, dataloader, num_passes=1000, print_losses=False):
+def train(
+    model: LSTM,
+    dataloader: DataLoader,
+    device: torch.device = torch.device('cpu'),
+    num_passes: int = 1000,
+    print_losses: bool = False
+) -> List:
     '''training loop'''
 
     # initialize loss and optimizer
@@ -32,8 +40,8 @@ def train(model: LSTM, dataloader, num_passes=1000, print_losses=False):
         for (X, s, ids) in dataloader:
             
             # compute loss
-            s_out = model.logits(X, ids)
-            loss = criterion(s_out, s)
+            s_out = model.logits(X.to(device), ids.to(device))
+            loss = criterion(s_out.to(device), s.to(device))
             
             # zero gradients, perform a backward pass, and update the weights
             optimizer.zero_grad()
@@ -49,7 +57,13 @@ def train(model: LSTM, dataloader, num_passes=1000, print_losses=False):
     return losses
 
 
-def test(model: LSTM, dataloader, print_accuracy=False, return_accuracy=False):
+def test(
+    model: LSTM,
+    dataloader: DataLoader,
+    device: torch.device = torch.device('cpu'),
+    print_accuracy: bool = False,
+    return_accuracy: bool = False
+) -> Union[str, bool]:
     '''testing loop'''
     
     with torch.no_grad():
@@ -63,7 +77,7 @@ def test(model: LSTM, dataloader, print_accuracy=False, return_accuracy=False):
         for (X, s, ids) in dataloader:
             
             # forward pass
-            s_out = model.predict(X, ids)
+            s_out = model.predict(X.to(device), ids.to(device))
     
             # check if correct, add to total samples
             total_correct += ((s_out == s).sum(1) == s.shape[1]).sum().item()
@@ -79,7 +93,15 @@ def test(model: LSTM, dataloader, print_accuracy=False, return_accuracy=False):
             return accuracy
 
 
-def eval(model, training_dataloader, testing_dataloader, num_passes=1000, print_loss_and_acc=True):
+
+def eval(
+    model: LSTM,
+    training_dataloader: DataLoader,
+    testing_dataloader: DataLoader,
+    device: torch.device = torch.device('cpu'),
+    num_passes: int = 1000,
+    print_loss_and_acc: bool = True
+) -> Tuple[List, List, List]:
     '''evaluation loop including loss, training accuracies, and testing accuracies'''
 
     # initialize loss and optimizer
@@ -98,8 +120,8 @@ def eval(model, training_dataloader, testing_dataloader, num_passes=1000, print_
         if t % 10 == 0:
             with torch.no_grad():
                 model.eval()
-                training_acc = test(model, training_dataloader, return_accuracy=True)
-                testing_acc = test(model, testing_dataloader, return_accuracy=True)
+                training_acc = test(model, training_dataloader, device=device, return_accuracy=True)
+                testing_acc = test(model, testing_dataloader, device=device, return_accuracy=True)
                 training_accs.append(training_acc)
                 testing_accs.append(testing_acc)
             model.train()
@@ -108,8 +130,8 @@ def eval(model, training_dataloader, testing_dataloader, num_passes=1000, print_
         for (X, s, ids) in training_dataloader:
         
             # compute loss
-            s_out = model.logits(X, ids)
-            loss = criterion(s_out, s)
+            s_out = model.logits(X.to(device), ids.to(device))
+            loss = criterion(s_out.to(device), s.to(device))
     
             # zero gradients, perform a backward pass, and update the weights
             optimizer.zero_grad()

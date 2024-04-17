@@ -1,12 +1,10 @@
 import argparse
 import pickle
 import numpy as np
-import addition_dataloader
-import eval
+import addition_data
+import torch
+import addition_eval
 from LSTM import LSTM
-import sys
-sys.path.append('../')
-import fn
 
 
 def main():
@@ -17,11 +15,13 @@ def main():
     args = parser.parse_args()
 
     # get carry tables
-    # with open('../pickles/all_tables.pickle', 'rb') as f:
-    #     all_tables = pickle.load(f)
-    # tables = all_tables[args.base]
-    tables = fn.construct_tables(args.base)
+    with open('../pickles/carry_tables/all_tables_d1_b1-6.pickle', 'rb') as f:
+        all_tables = pickle.load(f)
+    tables = all_tables[args.base]
     
+    # specify torch device (set to GPU if available)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     # train model for each table
     all_learning_metrics = {}
     for dc, table in tables.items():
@@ -37,11 +37,11 @@ def main():
         for _ in range(rollouts):
 
             # initialize model and dataloaders
-            model = LSTM(args.base, 1)
-            training_dataloader, testing_dataloader = addition_dataloader.prepare(args.base, 6, table, split_type='OOD', split_depth=3, sample=True)
+            model = LSTM(args.base, 1).to(device)
+            training_dataloader, testing_dataloader = addition_data.prepare(args.base, 6, table, split_type='OOD', split_depth=3, sample=True)
 
             # evaluate model and store output
-            losses, training_accs, testing_accs = eval.eval(model, training_dataloader, testing_dataloader, num_passes=num_passes, print_loss_and_acc=False)
+            losses, training_accs, testing_accs = addition_eval.eval(model, training_dataloader, testing_dataloader, device, num_passes=num_passes, print_loss_and_acc=False)
             avg_losses += (np.array(losses) / rollouts)
             avg_training_accs += (np.array(training_accs) / rollouts)
             avg_testing_accs += (np.array(testing_accs) / rollouts)
