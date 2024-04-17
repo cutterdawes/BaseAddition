@@ -18,4 +18,4 @@ module load openmpi/gcc/4.1.2
 conda activate env
 
 # execute carry_tables.py script
-kernprof -l test_job.py -b $1 -n 4
+kernprof -l test_job.py -b 3 -n 4

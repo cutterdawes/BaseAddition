@@ -25,7 +25,7 @@ def main():
     num_workers = 1 if (args.num_workers is None) else args.num_workers
 
     # get table
-    dc = ((0,)*args.b,)*args.b
+    dc = ((0,)*args.base,)*args.base
     table = tables[dc]
 
     # initialize model and dataloaders
