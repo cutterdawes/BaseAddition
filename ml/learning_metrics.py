@@ -42,7 +42,7 @@ def main():
             # initialize model and dataloaders
             model = LSTM(args.base, 1).to(device)
             training_dataloader, testing_dataloader = addition_data.prepare(
-                b=args.base, depth=6, table=table, batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=workers
+                b=args.base, depth=6, table=table, batch_size=125, split_type='OOD', split_depth=3, sample=True, num_workers=workers
             )
 
             # evaluate model and store output
@@ -59,7 +59,7 @@ def main():
     
     # pickle all learning metrics
     directory = '/home/cdawes/Repo/pickles' if (args.directory is None) else args.directory
-    with open(f'{directory}/learning_metrics{args.base}_10trials.pickle', 'wb') as f:
+    with open(f'{directory}/learning_metrics{args.base}_10trials_batch125.pickle', 'wb') as f:
         pickle.dump(all_learning_metrics, f)
 
 

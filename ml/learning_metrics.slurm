@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics5_10trials_wGPU
+#SBATCH --job-name=learning_metrics5_10trials_batch125
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1

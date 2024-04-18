@@ -1,7 +1,8 @@
 import numpy as np
+from typing import Tuple, Union
 
 # Recursive rule for carrying
-def recursive_carry_rule(carry_table, n: tuple, m: tuple):
+def recursive_carry_rule(carry_table, n: Tuple, m: Tuple):
     carried_tail = carry_table[n[1:], m[1:]]
     if type(carried_tail) in (int, np.int64):
         carried_tail = (carried_tail,)
@@ -16,7 +17,7 @@ class CarryTable():
     def __len__(self):
         return len(self.carry_table)
 
-    def __getitem__(self, elts: tuple):
+    def __getitem__(self, elts):
 
         # get tuples
         n, m = elts
@@ -45,7 +46,7 @@ class CarryTable():
     
 # elements of the form (nk, ..., n1) in which addition is performed by recursively applying the carry table
 class BaseElt():
-    def __init__(self, vals, carry_table):
+    def __init__(self, vals: Tuple, carry_table: Union[np.ndarray, CarryTable]):
         self.carry_table = CarryTable(carry_table)
         self.b = len(carry_table)
         vals = (vals,) if type(vals) in (int, np.int64) else vals

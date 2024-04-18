@@ -18,7 +18,7 @@ def pickle_measures(measures, args):
 
 def compute_measures(args):
     # load all_tables, get maximum depth if specified
-    with open('../pickles/all_tables.pickle', 'rb') as f:
+    with open('../pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
         all_tables = pickle.load(f)
     bases = list(all_tables.keys())
     max_depth = args.depth if args.depth else 4
@@ -31,7 +31,7 @@ def compute_measures(args):
 
     # iterate through bases and c's
     for b in bases:
-        if b > 4:
+        if b > 5:
             break
         for dc in all_tables[b].keys():
             for depth in range(1, max_depth+1):
