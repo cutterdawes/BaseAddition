@@ -11,8 +11,9 @@ def main():
     # create and parse arguments
     parser = argparse.ArgumentParser(description='Compute the valid carry tables for specified base')
     parser.add_argument('-b', '--base', type=int, required=True, help='Specified base')
+    parser.add_argument('-t', '--trials', type=int, required=False, help='number of training trials')
+    parser.add_argument('-w', '--workers', type=int, required=False, help='number of CPU workers for data preparation')
     parser.add_argument('-d', '--directory', type=str, required=False, help='directory of pickled output')
-    parser.add_argument('-n', '--num_workers', type=int, required=False, help='number of CPU workers for data preparation')
     args = parser.parse_args()
 
     # get carry tables
@@ -22,7 +23,7 @@ def main():
     
     # specify torch device (set to GPU if available), set number of CPU workers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    num_workers = 0 if (args.num_workers is None) else args.num_workers
+    workers = 0 if (args.workers is None) else args.workers
 
     # train model for each table
     all_learning_metrics = {}
@@ -35,27 +36,31 @@ def main():
         avg_testing_accs = np.zeros(int(num_passes / 10))
 
         # evaluate model multiple times, average metrics
-        rollouts = 10
-        for _ in range(rollouts):
+        trials = 10 if (args.trials is None) else args.trials
+        for _ in range(trials):
 
             # initialize model and dataloaders
             model = LSTM(args.base, 1).to(device)
-            training_dataloader, testing_dataloader = addition_data.prepare(args.base, 6, table, split_type='OOD', split_depth=3, sample=True, num_workers=num_workers)
+            training_dataloader, testing_dataloader = addition_data.prepare(
+                b=args.base, depth=6, table=table, batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=workers
+            )
 
             # evaluate model and store output
-            losses, training_accs, testing_accs = addition_eval.eval(model, training_dataloader, testing_dataloader, device, num_passes=num_passes, print_loss_and_acc=False)
-            avg_losses += (np.array(losses) / rollouts)
-            avg_training_accs += (np.array(training_accs) / rollouts)
-            avg_testing_accs += (np.array(testing_accs) / rollouts)
+            losses, training_accs, testing_accs = addition_eval.eval(
+                model, training_dataloader, testing_dataloader, device, num_passes=num_passes, lr=0.04, print_loss_and_acc=False
+            )
+            avg_losses += (np.array(losses) / trials)
+            avg_training_accs += (np.array(training_accs) / trials)
+            avg_testing_accs += (np.array(testing_accs) / trials)
         
         # add to learning metrics
         learning_metrics = {'loss': avg_losses, 'training_acc': avg_training_accs, 'testing_acc': avg_testing_accs}
         all_learning_metrics[dc] = learning_metrics
     
     # pickle all learning metrics
-    # directory = '/home/cdawes/Repo/pickles' if (args.directory is None) else args.directory
-    # with open(f'{directory}/learning_metrics{args.base}.pickle', 'wb') as f:
-    #     pickle.dump(all_learning_metrics, f)
+    directory = '/home/cdawes/Repo/pickles' if (args.directory is None) else args.directory
+    with open(f'{directory}/learning_metrics{args.base}_10trials.pickle', 'wb') as f:
+        pickle.dump(all_learning_metrics, f)
 
 
 if __name__ == '__main__':

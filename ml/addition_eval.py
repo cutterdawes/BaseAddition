@@ -104,13 +104,15 @@ def eval(
     testing_dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
     num_passes: int = 1000,
+    lr: float = 0.01,
+    log_interval: int = 10,
     print_loss_and_acc: bool = True
 ) -> Tuple[List, List, List]:
     '''evaluation loop including loss, training accuracies, and testing accuracies'''
 
     # initialize loss and optimizer
     criterion = CrossEntropy()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     # initialize loss and accuracy lists
     losses = []
@@ -121,7 +123,7 @@ def eval(
     for t in range(num_passes):
 
         # compute and store training and testing accuracies
-        if t % 10 == 0:
+        if t % log_interval == 0:
             with torch.no_grad():
                 model.eval()
                 training_acc = test(model, training_dataloader, device=device, return_accuracy=True)
@@ -148,7 +150,7 @@ def eval(
             optimizer.step()
 
         # store loss
-        if t % 10 == 0:
+        if t % log_interval == 0:
             losses.append(loss.item())
 
         # print loss and training/testing accuracies if specified
