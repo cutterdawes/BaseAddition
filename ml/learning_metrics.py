@@ -47,7 +47,7 @@ def main():
 
             # evaluate model and store output
             losses, training_accs, testing_accs = addition_eval.eval(
-                model, training_dataloader, testing_dataloader, device, num_passes=num_passes, lr=0.04, print_loss_and_acc=False
+                model, training_dataloader, testing_dataloader, device, num_passes=num_passes, lr=0.05, print_loss_and_acc=False
             )
             avg_losses += (np.array(losses) / trials)
             avg_training_accs += (np.array(training_accs) / trials)
