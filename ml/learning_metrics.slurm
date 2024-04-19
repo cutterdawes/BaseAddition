@@ -13,9 +13,9 @@
 
 # load modules and activate environment
 module purge
-module load anaconda3/2023.9
+module load anaconda3/2024.2
 module load openmpi/gcc/4.1.2
-conda activate env
+conda activate torch-env
 
 # execute carry_tables.py script
 python learning_metrics.py -b 5
