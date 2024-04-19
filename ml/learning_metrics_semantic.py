@@ -11,6 +11,7 @@ def main():
     # create and parse arguments
     parser = argparse.ArgumentParser(description='Compute the valid carry tables for specified base')
     parser.add_argument('-b', '--base', type=int, required=True, help='Specified base')
+    parser.add_argument('-u', '--unit', type=int, required=True, help='unit determining ordering of digits')
     parser.add_argument('-t', '--trials', type=int, required=False, help='number of training trials')
     parser.add_argument('-w', '--workers', type=int, required=False, help='number of CPU workers for data preparation')
     parser.add_argument('-d', '--directory', type=str, required=False, help='directory of pickled output')
@@ -28,6 +29,10 @@ def main():
     # train model for each table
     all_learning_metrics = {}
     for dc, table in tables.items():
+
+        # check if table corresponds to a unit
+        if len(np.unique(table)) != 2:
+            continue
             
         # initialize learning metrics
         num_passes = 2500
@@ -42,12 +47,13 @@ def main():
             # initialize model and dataloaders
             model = LSTM(args.base, 1).to(device)
             training_dataloader, testing_dataloader = addition_data.prepare(
-                b=args.base, depth=6, table=table, batch_size=16, split_type='OOD', split_depth=3, sample=True, num_workers=workers
+                b=args.base, depth=6, table=table, semanticity=True, unit=args.unit,
+                batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=workers
             )
 
             # evaluate model and store output
             losses, training_accs, testing_accs = addition_eval.eval(
-                model, training_dataloader, testing_dataloader, device, num_passes=num_passes, lr=0.04, print_loss_and_acc=False
+                model, training_dataloader, testing_dataloader, device, num_passes=num_passes, lr=0.05, print_loss_and_acc=False
             )
             avg_losses += (np.array(losses) / trials)
             avg_training_accs += (np.array(training_accs) / trials)
@@ -62,7 +68,7 @@ def main():
 
     # pickle all learning metrics
     directory = '../pickles/learning_metrics' if (args.directory is None) else args.directory
-    with open(f'{directory}/learning_metrics{args.base}_{trials}trials.pickle', 'wb') as f:
+    with open(f'{directory}/learning_metrics{args.base}_semantic{args.unit}.pickle', 'wb') as f:
         pickle.dump(all_learning_metrics, f)
 
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics5_10trials
+#SBATCH --job-name=learning_metrics5_semantic1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
@@ -18,4 +18,4 @@ module load openmpi/gcc/4.1.2
 conda activate env
 
 # execute carry_tables.py script
-python learning_metrics.py -b 5
+python learning_metrics_semantic.py -b 5 -u 1
