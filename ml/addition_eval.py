@@ -22,13 +22,14 @@ def train(
     dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
     num_passes: int = 1000,
+    lr: float = 0.01,
     print_losses: bool = False
 ) -> List:
     '''training loop'''
 
     # initialize loss and optimizer
     criterion = CrossEntropy()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     # initialize loss list
     losses = []

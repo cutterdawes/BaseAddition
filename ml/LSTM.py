@@ -3,7 +3,7 @@ from torch import nn
 
 
 class LSTM(nn.Module):
-    '''small LSTM-based base addition model'''
+    '''small LSTM-based addition model'''
 
     def __init__(self, b, layers):
         super().__init__()
