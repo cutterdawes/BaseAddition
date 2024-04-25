@@ -23,9 +23,9 @@ class CarryTable():
         n, m = elts
 
         # convert to tuple if necessary
-        if type(n) in (int, np.int64):
+        if type(n) in (int, np.int64, np.float64):
             n = (n,)
-        if type(m) in (int, np.int64):
+        if type(m) in (int, np.int64, np.float64):
             m = (m,)
 
         # zero pad if necessary
@@ -49,7 +49,7 @@ class BaseElt():
     def __init__(self, vals: Tuple, carry_table: Union[np.ndarray, CarryTable]):
         self.carry_table = CarryTable(carry_table)
         self.b = len(carry_table)
-        vals = (vals,) if type(vals) in (int, np.int64) else vals
+        vals = (vals,) if type(vals) in (int, np.int64, np.float64) else vals
         self.vals = vals
 
     def __len__(self):

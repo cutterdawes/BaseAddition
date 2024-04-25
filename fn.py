@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import BoundaryNorm
 from itertools import product, combinations
 import random
 import math
@@ -127,45 +128,66 @@ def get_dim(table):
 
 ############################## displaying carry tables #############################
 
-def show_tables(table_dict, b, depth=1):
+def add_border(ax, color='blue', width=2):
+    for spine in ax.spines.values():
+        spine.set_color(color)
+        spine.set_linewidth(width)
+
+def show_tables(table_dict, b, depth=1, savefig=False):
     
     # create fig, axes
     n = len(table_dict)
     w = int(np.ceil(np.sqrt(n)))
     fig, axes = plt.subplots(w, math.ceil(n / w), figsize=(2*w, 2*n//w))
+    fig.suptitle('Carry Tables, '+ r'$b =$' + str(b), fontsize=18, y=0.94)
     try:
         axes = axes.flatten()
     except:
         axes = [axes]
+
+    # sort table_dict
+    table_dict = {dc: table_dict[dc] for dc in sorted(table_dict.keys())}
     
     # iterate through table_dict
     i = 0
-    cs = list(product(*[range(b)]*(b-1)))
     for dc, table in table_dict.items():
-
-        # find simplest c associated with dc
-        for c in cs:
-            c = tuple(c)
-            c = (0,) + c
-            if construct_coboundary(c) == dc:
-                break
 
         # construct product table if specified
         if (depth > 1):
             table = construct_product_table(table, depth)
 
+        # classify as standard, alt. unit, or other carry
+        if (np.array(dc) == 0).all():
+            carry_type = 'Standard'
+            color = 'blue'
+        elif len(np.unique(table)) == 2:
+            carry_type = 'Alt. Unit'
+            color = 'orange'
+        else:
+            carry_type = 'Other'
+            color = 'silver'
+
         # display image, increment i
         ax = axes[i]
-        im = ax.imshow(table, cmap='viridis', vmin=0, vmax=b-1)
-        ax.set_title(f'c = {str(c)}', fontsize=10)
+        add_border(ax, color=color, width=4)
+        levels = np.linspace(-0.5, b-0.5, b+1)
+        norm = BoundaryNorm(levels, ncolors=256)
+        im = ax.imshow(table, cmap='viridis', norm=norm)
+        # ax.set_title(carry_type, fontsize=10)
         i += 1
 
-    # turn off axes
+    # turn off axis ticks and labels
     for ax in axes:
-        ax.axis('off')
+        ax.tick_params(axis='both', which='both', length=0)
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
     
     # add colorbar
-    fig.subplots_adjust(right=0.9)
-    cbar_ax = fig.add_axes([0.94, 0.15, 0.05, 0.7])
-    cbar = fig.colorbar(im, cax=cbar_ax, aspect=80/w)
+    plt.tight_layout()
+    fig.subplots_adjust(left=0.12, right=0.88, bottom=0.12, top=0.88)
+    cbar_ax = fig.add_axes([0.92, 0.3, 0.04, 0.4])
+    cbar = fig.colorbar(im, cax=cbar_ax, boundaries=levels, drawedges=True)
     cbar.set_ticks(range(b))
+
+    if savefig:
+        plt.savefig(f'../figures/tables{b}_d{depth}.png', dpi=300)
