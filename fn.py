@@ -125,6 +125,22 @@ def get_dim(table):
     dim = np.log(N) / np.log(eps_inv)
     return dim
 
+def get_order(u, b, k):
+    order = tuple((j*u)%b for j in range(b))
+    order = list(product(*[order]*k))
+    order = [np.sum(np.array(n)*b**np.flip(range(k))) for n in order]
+    return order
+
+def get_min_dim(table, b):
+    k = int(math.log(len(table), b))
+    min_dim = np.inf
+    for u in range(b):
+        if math.gcd(u, b) == 1:
+            order = get_order(u, b, k)
+            dim = get_dim(table[order][:,order])
+            if dim < min_dim:
+                min_dim = dim
+    return min_dim
 
 ############################## displaying carry tables #############################
 

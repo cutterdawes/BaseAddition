@@ -31,7 +31,7 @@ def compute_measures(args):
 
     # iterate through bases and c's
     for b in bases:
-        if b > 5:
+        if b > 4:
             break
         for dc in all_tables[b].keys():
             for depth in range(1, max_depth+1):
@@ -40,7 +40,7 @@ def compute_measures(args):
                 frac_zeros_vs_depth[b][dc].append(frac_zeros)
                 num_digits = len(np.unique(table))
                 num_digits_vs_depth[b][dc].append(num_digits)
-                est_dim = fn.get_dim(table)
+                est_dim = fn.get_min_dim(table, b)
                 est_dim_box_vs_depth[b][dc].append(est_dim)
 
     # add to measures
