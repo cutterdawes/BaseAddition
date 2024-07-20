@@ -31,7 +31,7 @@ def compute_measures(args):
 
     # iterate through bases and c's
     for b in bases:
-        if b > 4:
+        if b > 5:
             break
         for dc in all_tables[b].keys():
             for depth in range(1, max_depth+1):
