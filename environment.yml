@@ -1,0 +1,16 @@
+name: addition
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - matplotlib
+  - more-itertools
+  - tqdm
+  - scipy
+  - pytorch
+  - torchvision
+  - mpi4py
+  - pip
+  - pip:
+      - python-markdown-math
