@@ -5,6 +5,7 @@ import addition_data
 import torch
 import addition_eval
 from LSTM import LSTM
+from RNN import RNN
 
 
 def main():
@@ -40,7 +41,8 @@ def main():
         for _ in range(trials):
 
             # initialize model and dataloaders
-            model = LSTM(args.base, 1).to(device)
+            # model = LSTM(args.base, 1).to(device)
+            model = RNN(args.base, 1).to(device)
             training_dataloader, testing_dataloader = addition_data.prepare(
                 b=args.base, depth=6, table=table, batch_size=16, split_type='OOD', split_depth=3, sample=True, num_workers=workers
             )
@@ -61,9 +63,9 @@ def main():
         print(f'completed trails for table:\n{table}\n')
 
     # pickle all learning metrics
-    directory = '../pickles/learning_metrics' if (args.directory is None) else args.directory
-    with open(f'{directory}/learning_metrics{args.base}_{trials}trials.pickle', 'wb') as f:
-        pickle.dump(all_learning_metrics, f)
+    # directory = '../pickles/learning_metrics' if (args.directory is None) else args.directory
+    # with open(f'{directory}/learning_metrics{args.base}_{trials}trials.pickle', 'wb') as f:
+    #     pickle.dump(all_learning_metrics, f)
 
 
 if __name__ == '__main__':

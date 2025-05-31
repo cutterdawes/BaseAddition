@@ -155,7 +155,7 @@ def show_tables(table_dict, b, depth=1, savefig=False):
     n = len(table_dict)
     w = int(np.ceil(np.sqrt(n)))
     fig, axes = plt.subplots(w, math.ceil(n / w), figsize=(2*w, 2*n//w))
-    fig.suptitle('Carry Tables, '+ r'$b =$' + str(b), fontsize=18, y=0.94)
+    fig.suptitle('Carry Tables, '+ r'$b =$' + str(b), fontsize=16, y=0.94)
     try:
         axes = axes.flatten()
     except:
@@ -185,7 +185,7 @@ def show_tables(table_dict, b, depth=1, savefig=False):
 
         # display image, increment i
         ax = axes[i]
-        add_border(ax, color=color, width=4)
+        add_border(ax, color=color, width=5)
         levels = np.linspace(-0.5, b-0.5, b+1)
         norm = BoundaryNorm(levels, ncolors=256)
         im = ax.imshow(table, cmap='viridis', norm=norm)
@@ -193,10 +193,20 @@ def show_tables(table_dict, b, depth=1, savefig=False):
         i += 1
 
     # turn off axis ticks and labels
+    i = 0
     for ax in axes:
-        ax.tick_params(axis='both', which='both', length=0)
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
+        # ax.tick_params(axis='both', which='both', length=0)
+        if i % w == 0:
+            ax.set_yticks(range(b))
+            ax.tick_params(axis='y', length=0)
+        else:
+            ax.set_yticks([])
+        if i // w == w - 1:
+            ax.set_xticks(range(b))
+            ax.tick_params(axis='x', length=0)
+        else:
+            ax.set_xticks([])
+        i += 1
     
     # add colorbar
     plt.tight_layout()
@@ -204,6 +214,7 @@ def show_tables(table_dict, b, depth=1, savefig=False):
     cbar_ax = fig.add_axes([0.92, 0.3, 0.04, 0.4])
     cbar = fig.colorbar(im, cax=cbar_ax, boundaries=levels, drawedges=True)
     cbar.set_ticks(range(b))
+    cbar.set_label('Carry Value', fontsize=12, rotation=270, labelpad=15)
 
     if savefig:
-        plt.savefig(f'../figures/tables{b}_d{depth}.png', dpi=300)
+        plt.savefig(f'../figures/tables{b}_d{depth}.png', dpi=300, bbox_inches='tight')
