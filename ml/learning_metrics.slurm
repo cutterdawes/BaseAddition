@@ -15,7 +15,7 @@
 module purge
 module load anaconda3/2024.2
 module load openmpi/gcc/4.1.2
-conda activate torch-env
+conda activate addition
 
 # execute carry_tables.py script
-python learning_metrics.py -b 5
+python learning_metrics.py -b 3 -m 'RNN' --trials 10

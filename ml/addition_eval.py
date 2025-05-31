@@ -148,6 +148,7 @@ def eval(
             # zero gradients, perform a backward pass, and update the weights
             optimizer.zero_grad()
             loss.backward()
+            nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)  # gradient clipping
             optimizer.step()
 
         # store loss
@@ -155,7 +156,7 @@ def eval(
             losses.append(loss.item())
 
         # print loss and training/testing accuracies if specified
-        if (t % 100 == 0) and print_loss_and_acc:
+        if (t % log_interval == 0) and print_loss_and_acc:
             print(f't = {t}\nloss = {loss.item():.6f}, training_acc = {training_acc:.3f}, testing_acc = {testing_acc:.3f}\n') 
         
     return losses, training_accs, testing_accs
