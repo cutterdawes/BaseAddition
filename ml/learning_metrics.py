@@ -35,7 +35,7 @@ def main():
     # train model for each table
     all_learning_metrics = {}
     models = {'RNN': RNN, 'GRU': GRU, 'LSTM': LSTM}
-    lr = {'RNN': 0.01, 'GRU': 0.05, 'LSTM': 0.05}
+    lrs = {'RNN': 0.01, 'GRU': 0.05, 'LSTM': 0.05}
     for dc, table in tables.items():
             
         # initialize learning metrics
@@ -53,7 +53,7 @@ def main():
             )
 
             # evaluate model and store output
-            lr = lr[args.model]
+            lr = lrs[args.model]
             losses, training_accs, testing_accs = addition_eval.eval(
                 model, training_dataloader, testing_dataloader, device, epochs=args.epochs, lr=lr, print_loss_and_acc=False
             )
