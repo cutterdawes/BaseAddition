@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from LSTM import LSTM
+from models import RNN, GRU, LSTM
 from typing import Tuple, List, Union
 
 
@@ -18,10 +18,10 @@ class CrossEntropy(nn.Module):
 
 
 def train(
-    model: LSTM,
+    model: Union[RNN, GRU, LSTM],
     dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
-    num_passes: int = 1000,
+    epochs: int = 1000,
     lr: float = 0.01,
     print_losses: bool = False
 ) -> List:
@@ -35,13 +35,13 @@ def train(
     losses = []
 
     # training loop
-    for t in range(num_passes):
+    for t in range(epochs):
 
         # optimize over training data
-        for (X, s, ids) in dataloader:
+        for (x, s, ids) in dataloader:
             
             # compute loss
-            s_out = model.logits(X.to(device), ids.to(device))
+            s_out = model.logits(x.to(device), ids.to(device))
             loss = criterion(s_out.to(device), s.to(device))
             
             # zero gradients, perform a backward pass, and update the weights
@@ -59,7 +59,7 @@ def train(
 
 
 def test(
-    model: LSTM,
+    model: Union[RNN, GRU, LSTM],
     dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
     print_accuracy: bool = False,
@@ -75,15 +75,15 @@ def test(
         # perform evaluation
         total_correct = 0
         total_samples = 0
-        for (X, s, ids) in dataloader:
+        for (x, s, ids) in dataloader:
             
             # send tensors to device
-            X = X.to(device)
+            x = x.to(device)
             s = s.to(device)
             ids = ids.to(device)
 
             # forward pass
-            s_out = model.predict(X, ids).to(device)
+            s_out = model.predict(x, ids).to(device)
     
             # check if correct, add to total samples
             total_correct += ((s_out == s).sum(1) == s.shape[1]).sum().item()
@@ -100,11 +100,11 @@ def test(
 
 
 def eval(
-    model: LSTM,
+    model: Union[RNN, GRU, LSTM],
     training_dataloader: DataLoader,
     testing_dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
-    num_passes: int = 1000,
+    epochs: int = 1000,
     lr: float = 0.01,
     log_interval: int = 10,
     print_loss_and_acc: bool = True
@@ -121,7 +121,7 @@ def eval(
     testing_accs = []
 
     # training loop
-    for t in range(num_passes):
+    for t in range(epochs):
 
         # compute and store training and testing accuracies
         if t % log_interval == 0:
@@ -134,21 +134,22 @@ def eval(
             model.train()
 
         # optimize over training data
-        for (X, s, ids) in training_dataloader:
+        for (x, s, ids) in training_dataloader:
 
             # send tensors to device
-            X = X.to(device)
+            x = x.to(device)
             s = s.to(device)
             ids = ids.to(device)
 
             # compute loss
-            s_out = model.logits(X, ids).to(device)
+            s_out = model.logits(x, ids).to(device)
             loss = criterion(s_out, s)
     
             # zero gradients, perform a backward pass, and update the weights
             optimizer.zero_grad()
             loss.backward()
-            nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)  # gradient clipping
+            if isinstance(model, RNN):  # gradient clipping
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
 
         # store loss

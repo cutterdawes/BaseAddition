@@ -4,8 +4,7 @@ import numpy as np
 import addition_data
 import torch
 import addition_eval
-from LSTM import LSTM
-from RNN import RNN
+from models import RNN, GRU, LSTM
 
 
 def main():
@@ -14,7 +13,9 @@ def main():
     parser.add_argument('-b', '--base', type=int, required=True,
                         help='specified base')
     parser.add_argument('-m', '--model', type=str, required=False, default='RNN',
-                        help='model type (RNN or LSTM; default: RNN)')
+                        help='model type (RNN, GRU, or LSTM; default: RNN)')
+    parser.add_argument('-e', '--epochs', type=int, required=False, default=2500,
+                        help='number of training epochs (default: 2500)')
     parser.add_argument('-t', '--trials', type=int, required=False, default=10,
                         help='number of training trials (default: 10)')
     parser.add_argument('-w', '--workers', type=int, required=False, default=0,
@@ -33,27 +34,28 @@ def main():
 
     # train model for each table
     all_learning_metrics = {}
+    models = {'RNN': RNN, 'GRU': GRU, 'LSTM': LSTM}
+    lr = {'RNN': 0.01, 'GRU': 0.05, 'LSTM': 0.05}
     for dc, table in tables.items():
             
         # initialize learning metrics
-        num_passes = 2500
-        avg_losses = np.zeros(int(num_passes / 10))
-        avg_training_accs = np.zeros(int(num_passes / 10))
-        avg_testing_accs = np.zeros(int(num_passes / 10))
+        avg_losses = np.zeros(int(args.epochs / 10))
+        avg_training_accs = np.zeros(int(args.epochs / 10))
+        avg_testing_accs = np.zeros(int(args.epochs / 10))
 
         # evaluate model multiple times, average metrics
         for _ in range(args.trials):
 
             # initialize model and dataloaders
-            model = LSTM(args.base, 1).to(device) if args.model == 'LSTM' else RNN(args.base, 1).to(device)
+            model = models[args.model](args.base, 1).to(device)
             training_dataloader, testing_dataloader = addition_data.prepare(
                 b=args.base, depth=6, table=table, batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
             )
 
             # evaluate model and store output
-            lr = 0.04 if args.model == 'LSTM' else 0.001
+            lr = lr[args.model]
             losses, training_accs, testing_accs = addition_eval.eval(
-                model, training_dataloader, testing_dataloader, device, num_passes=num_passes, lr=lr, print_loss_and_acc=False
+                model, training_dataloader, testing_dataloader, device, epochs=args.epochs, lr=lr, print_loss_and_acc=False
             )
             avg_losses += (np.array(losses) / args.trials)
             avg_training_accs += (np.array(training_accs) / args.trials)

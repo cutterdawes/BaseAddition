@@ -18,4 +18,4 @@ module load openmpi/gcc/4.1.2
 conda activate addition
 
 # execute carry_tables.py script
-python learning_metrics.py -b 3 -m 'RNN' --trials 10
+python learning_metrics.py -b 3 -m 'RNN' --epochs 200000 --trials 10

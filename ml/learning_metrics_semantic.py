@@ -4,8 +4,7 @@ import numpy as np
 import addition_data
 import torch
 import addition_eval
-from LSTM import LSTM
-
+from models import RNN, GRU, LSTM
 
 def main():
     # create and parse arguments
