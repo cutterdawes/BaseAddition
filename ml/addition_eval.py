@@ -148,7 +148,7 @@ def eval(
             # zero gradients, perform a backward pass, and update the weights
             optimizer.zero_grad()
             loss.backward()
-            if isinstance(model, RNN):  # gradient clipping
+            if isinstance(model, RNN) or isinstance(model, GRU):  # gradient clipping
                 nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
 

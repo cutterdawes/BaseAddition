@@ -35,7 +35,7 @@ def main():
     # train model for each table
     all_learning_metrics = {}
     models = {'RNN': RNN, 'GRU': GRU, 'LSTM': LSTM}
-    lrs = {'RNN': 0.01, 'GRU': 0.05, 'LSTM': 0.05}
+    lrs = {'RNN': 0.005, 'GRU': 0.05, 'LSTM': 0.05}
     for dc, table in tables.items():
             
         # initialize learning metrics
@@ -49,7 +49,7 @@ def main():
             # initialize model and dataloaders
             model = models[args.model](args.base, 1).to(device)
             training_dataloader, testing_dataloader = addition_data.prepare(
-                b=args.base, depth=6, table=table, batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
+                b=args.base, depth=6, table=table, batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
             )
 
             # evaluate model and store output
