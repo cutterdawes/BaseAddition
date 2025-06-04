@@ -4,18 +4,25 @@ import pickle
 import numpy as np
 import torch
 
-import ml.dataset as dataset
-import ml.training as training
-from ml.model import model
+from ml import dataset
+from ml import training
+from ml.model import recurrent_model
 
 def main():
     # create and parse arguments
     parser = argparse.ArgumentParser(description='Compute the valid carry tables for specified base')
-    parser.add_argument('-b', '--base', type=int, required=True, help='Specified base')
-    parser.add_argument('-u', '--unit', type=int, required=True, help='unit determining ordering of digits')
-    parser.add_argument('-t', '--trials', type=int, required=False, help='number of training trials')
-    parser.add_argument('-w', '--workers', type=int, required=False, help='number of CPU workers for data preparation')
-    parser.add_argument('-d', '--directory', type=str, required=False, help='directory of pickled output')
+    parser.add_argument('-b', '--base', type=int, required=True,
+                        help='Specified base')
+    parser.add_argument('-u', '--unit', type=int, required=True,
+                        help='unit determining ordering of digits')
+    parser.add_argument('-m', '--model', type=str, required=False, default='RNN',
+                        help='model type (RNN, GRU, or LSTM; default: RNN)')
+    parser.add_argument('-t', '--trials', type=int, required=False,
+                        help='number of training trials')
+    parser.add_argument('-w', '--workers', type=int, required=False,
+                        help='number of CPU workers for data preparation')
+    parser.add_argument('-d', '--directory', type=str, required=False,
+                        help='directory of pickled output')
     args = parser.parse_args()
 
     # get carry tables
@@ -46,7 +53,7 @@ def main():
         for _ in range(trials):
 
             # initialize model and dataloaders
-            model = LSTM(args.base, 1).to(device)
+            model = recurrent_model(args.base, 1, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, semanticity=True, unit=args.unit,
                 batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=workers

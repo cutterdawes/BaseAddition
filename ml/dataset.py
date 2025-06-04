@@ -39,7 +39,7 @@ import random
 import math
 import sys
 sys.path.append('../')
-from math.base_rep import CarryTable, BaseElt
+from base_rep import CarryTable, BaseElt
 
 
 def _int_to_tuple(n, b):

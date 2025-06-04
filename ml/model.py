@@ -2,10 +2,10 @@ import torch
 from torch import nn
 
 
-class model(nn.Module):
+class recurrent_model(nn.Module):
     '''simple recurrent neural network model'''
 
-    def __init__(self, b, layers, model_type='RNN'):
+    def __init__(self, b, layers, type='RNN'):
         super().__init__()
         '''initialize model'''
 
@@ -13,17 +13,18 @@ class model(nn.Module):
         if b < 2:
             raise ValueError('base must be at least 2')
         self.b = b
-        self.layers = layers    
-
+        self.layers = layers 
+        if type not in ['RNN', 'GRU', 'LSTM']:
+            raise ValueError(f'Invalid RNN type: {type}')
+        self.type = type
+        
         # define layers
-        if model_type == 'RNN':
+        if self.type == 'RNN':
             self.recurrent = nn.RNN(b, b, layers, batch_first=True)
-        elif model_type == 'GRU':
+        elif self.type == 'GRU':
             self.recurrent = nn.GRU(b, b, layers, batch_first=True)
-        elif model_type == 'LSTM':
+        elif self.type == 'LSTM':
             self.recurrent = nn.LSTM(b, b, layers, batch_first=True)
-        else:
-            raise ValueError(f'Invalid RNN type: {model_type}')
         self.linear = nn.Linear(b, b)
 
     def forward(self, x):

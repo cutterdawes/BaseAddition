@@ -3,9 +3,9 @@ import pickle
 import numpy as np
 import torch
 
-import ml.dataset as dataset
-import ml.training as training
-from ml.model import model
+from ml import dataset
+from ml import training
+from ml.model import recurrent_model
 
 
 def main():
@@ -21,12 +21,12 @@ def main():
                         help='number of training trials (default: 10)')
     parser.add_argument('-w', '--workers', type=int, required=False, default=0,
                         help='number of CPU workers for data preparation (default: 0)')
-    parser.add_argument('-d', '--directory', type=str, required=False, default='../pickles/learning_metrics',
-                        help='directory of pickled output (default: ../pickles/learning_metrics)')
+    parser.add_argument('-d', '--directory', type=str, required=False, default='pickles/learning_metrics',
+                        help='directory of pickled output (default: pickles/learning_metrics)')
     args = parser.parse_args()
 
     # get carry tables
-    with open('../pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
+    with open('pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
         all_tables = pickle.load(f)
     tables = all_tables[args.base]
     
@@ -47,7 +47,7 @@ def main():
         for _ in range(args.trials):
 
             # initialize model and dataloaders
-            model = model(args.base, 1, args.model).to(device)
+            model = recurrent_model(args.base, 1, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
             )
