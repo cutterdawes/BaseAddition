@@ -20,4 +20,4 @@ conda activate addition
 cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
-mpirun -np 3 python -m ml.learning_metrics.basic_metrics -b 3 -m 'GRU' -t 1
+mpirun -np 3 python -m ml.learning_metrics.basic_metrics -b 5 -m 'GRU' -t 10
