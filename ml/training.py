@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from models import RNN, GRU, LSTM
 from typing import Tuple, List, Union
+
+from ml.model import model
 
 
 class CrossEntropy(nn.Module):
@@ -18,7 +19,7 @@ class CrossEntropy(nn.Module):
 
 
 def train(
-    model: Union[RNN, GRU, LSTM],
+    model: model,
     dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
     epochs: int = 1000,
@@ -59,7 +60,7 @@ def train(
 
 
 def test(
-    model: Union[RNN, GRU, LSTM],
+    model: model,
     dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
     print_accuracy: bool = False,
@@ -100,7 +101,7 @@ def test(
 
 
 def eval(
-    model: Union[RNN, GRU, LSTM],
+    model: model,
     training_dataloader: DataLoader,
     testing_dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),

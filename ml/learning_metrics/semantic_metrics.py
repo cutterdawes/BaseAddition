@@ -1,10 +1,12 @@
 import argparse
 import pickle
+
 import numpy as np
-import addition_data
 import torch
-import addition_eval
-from models import RNN, GRU, LSTM
+
+import ml.dataset as dataset
+import ml.training as training
+from ml.model import model
 
 def main():
     # create and parse arguments
@@ -45,13 +47,13 @@ def main():
 
             # initialize model and dataloaders
             model = LSTM(args.base, 1).to(device)
-            training_dataloader, testing_dataloader = addition_data.prepare(
+            training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, semanticity=True, unit=args.unit,
                 batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=workers
             )
 
             # evaluate model and store output
-            losses, training_accs, testing_accs = addition_eval.eval(
+            losses, training_accs, testing_accs = training.eval(
                 model, training_dataloader, testing_dataloader, device, num_passes=num_passes, lr=0.05, print_loss_and_acc=False
             )
             avg_losses += (np.array(losses) / trials)

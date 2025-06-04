@@ -1,9 +1,11 @@
 import argparse
 import pickle
 import numpy as np
+
 import sys
 sys.path.append('../')
-import fn
+
+import utils
 
 
 def pickle_measures(measures, args):
@@ -35,12 +37,12 @@ def compute_measures(args):
             break
         for dc in all_tables[b].keys():
             for depth in range(1, max_depth+1):
-                table = fn.construct_product_table(all_tables[b][dc], depth=depth)
+                table = utils.construct_product_table(all_tables[b][dc], depth=depth)
                 frac_zeros = (table.size - np.count_nonzero(table)) / table.size
                 frac_zeros_vs_depth[b][dc].append(frac_zeros)
                 num_digits = len(np.unique(table))
                 num_digits_vs_depth[b][dc].append(num_digits)
-                est_dim = fn.get_min_dim(table, b)
+                est_dim = utils.get_min_dim(table, b)
                 est_dim_box_vs_depth[b][dc].append(est_dim)
 
     # add to measures

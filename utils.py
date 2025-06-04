@@ -1,11 +1,13 @@
+import math
+import random
+from itertools import product, combinations
 import numpy as np
+
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
-from itertools import product, combinations
-import random
-import math
 from tqdm.autonotebook import tqdm
-from base import CarryTable, BaseElt
+
+from math.base_rep import CarryTable, BaseElt
 
 
 ############################## cocycle-finding functions #############################

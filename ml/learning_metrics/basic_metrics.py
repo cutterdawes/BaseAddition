@@ -1,10 +1,11 @@
 import argparse
 import pickle
 import numpy as np
-import addition_data
 import torch
-import addition_eval
-from models import RNN, GRU, LSTM
+
+import ml.dataset as dataset
+import ml.training as training
+from ml.model import model
 
 
 def main():
@@ -34,7 +35,6 @@ def main():
 
     # train model for each table
     all_learning_metrics = {}
-    models = {'RNN': RNN, 'GRU': GRU, 'LSTM': LSTM}
     lrs = {'RNN': 0.005, 'GRU': 0.05, 'LSTM': 0.05}
     for dc, table in tables.items():
             
@@ -47,14 +47,14 @@ def main():
         for _ in range(args.trials):
 
             # initialize model and dataloaders
-            model = models[args.model](args.base, 1).to(device)
-            training_dataloader, testing_dataloader = addition_data.prepare(
+            model = model(args.base, 1, args.model).to(device)
+            training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
             )
 
             # evaluate model and store output
             lr = lrs[args.model]
-            losses, training_accs, testing_accs = addition_eval.eval(
+            losses, training_accs, testing_accs = training.eval(
                 model, training_dataloader, testing_dataloader, device, epochs=args.epochs, lr=lr, print_loss_and_acc=False
             )
             avg_losses += (np.array(losses) / args.trials)

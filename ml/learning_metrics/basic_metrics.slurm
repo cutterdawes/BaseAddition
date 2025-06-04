@@ -18,6 +18,6 @@ module load openmpi/gcc/4.1.2
 conda activate addition
 
 # execute carry_tables.py script
-python learning_metrics.py -b 3 -m 'GRU' --trials 10
-python learning_metrics.py -b 4 -m 'GRU' --trials 10
-python learning_metrics.py -b 5 -m 'GRU' --trials 10
+python basic_metrics.py -b 3 -m 'GRU' --trials 10
+python basic_metrics.py -b 4 -m 'GRU' --trials 10
+python basic_metrics.py -b 5 -m 'GRU' --trials 10

@@ -18,4 +18,4 @@ module load openmpi/gcc/4.1.2
 conda activate torch-env
 
 # execute carry_tables.py script
-python learning_metrics_semantic.py -b 5 -u 1
+python semantic_metrics.py -b 5 -u 1

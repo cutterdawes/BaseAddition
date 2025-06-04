@@ -1,12 +1,13 @@
-# import packages
 import argparse
-from mpi4py import MPI
 import pickle
 from itertools import product
 import numpy as np
+from mpi4py import MPI
+
 import sys
 sys.path.append('../')
-import fn
+
+import utils
 
 
 def pickle_tables(tables, args):
@@ -40,7 +41,7 @@ def parallel_case(args):
     size = comm.Get_size()
 
     # check candidate cocycles on each worker's portion
-    scattered_tables = fn.construct_tables(args.base, rank=rank, size=size)
+    scattered_tables = utils.construct_tables(args.base, rank=rank, size=size)
 
     # gather tables from all workers
     gathered_tables = comm.gather(scattered_tables, root=0)
@@ -68,7 +69,7 @@ def main():
         parallel_case(args)
     else:
         # serial case
-        tables = fn.construct_tables(args.base)
+        tables = utils.construct_tables(args.base)
         pickle_tables(tables, args)
 
 

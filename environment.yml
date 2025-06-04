@@ -11,6 +11,7 @@ dependencies:
   - pytorch
   - torchvision
   - mpi4py
+  - pyyaml
   - pip
   - pip:
       - python-markdown-math

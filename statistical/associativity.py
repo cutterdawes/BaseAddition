@@ -1,11 +1,11 @@
-# import packages
 import argparse
 from itertools import product, combinations
 import random
 import pickle
+
 import sys
 sys.path.append('../')
-from base import BaseElt
+from math.base_rep import BaseElt
 
 
 def main():
