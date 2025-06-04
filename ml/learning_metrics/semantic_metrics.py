@@ -6,7 +6,7 @@ import torch
 
 from ml import dataset
 from ml import training
-from ml.model import recurrent_model
+from ml.model import RecurrentModel
 
 def main():
     # create and parse arguments
@@ -53,7 +53,7 @@ def main():
         for _ in range(trials):
 
             # initialize model and dataloaders
-            model = recurrent_model(args.base, 1, args.model).to(device)
+            model = RecurrentModel(args.base, 1, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, semanticity=True, unit=args.unit,
                 batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=workers

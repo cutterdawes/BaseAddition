@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class recurrent_model(nn.Module):
+class RecurrentModel(nn.Module):
     '''simple recurrent neural network model'''
 
     def __init__(self, b, layers, type='RNN'):

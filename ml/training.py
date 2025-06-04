@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from typing import Tuple, List, Union
 
-from ml.model import recurrent_model
+from ml.model import RecurrentModel
 
 
 class CrossEntropy(nn.Module):
@@ -19,7 +19,7 @@ class CrossEntropy(nn.Module):
 
 
 def train(
-    model: recurrent_model,
+    model: RecurrentModel,
     dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
     epochs: int = 1000,
@@ -60,7 +60,7 @@ def train(
 
 
 def test(
-    model: recurrent_model,
+    model: RecurrentModel,
     dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),
     print_accuracy: bool = False,
@@ -101,7 +101,7 @@ def test(
 
 
 def eval(
-    model: recurrent_model,
+    model: RecurrentModel,
     training_dataloader: DataLoader,
     testing_dataloader: DataLoader,
     device: torch.device = torch.device('cpu'),

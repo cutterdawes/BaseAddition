@@ -1,13 +1,12 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics5_10trials
+#SBATCH --job-name=learning_metrics
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=3
+#SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=12G
-#SBATCH --gres=gpu:1
-#SBATCH --time=12:00:00
+#SBATCH --time=01:00:00
 #SBATCH --mail-type=begin,end,fail
 #SBATCH --mail-user=cdawes@princeton.edu
 
@@ -17,7 +16,8 @@ module load anaconda3/2024.2
 module load openmpi/gcc/4.1.2
 conda activate addition
 
+# change to project root
+cd /home/cdawes/BaseAddition
+
 # execute carry_tables.py script
-python basic_metrics.py -b 3 -m 'GRU' --trials 10
-python basic_metrics.py -b 4 -m 'GRU' --trials 10
-python basic_metrics.py -b 5 -m 'GRU' --trials 10
+mpirun -np 3 python -m ml.learning_metrics.basic_metrics -b 3 -m 'GRU' -t 1

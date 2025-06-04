@@ -2,10 +2,11 @@ import argparse
 import pickle
 import numpy as np
 import torch
+from mpi4py import MPI
 
 from ml import dataset
 from ml import training
-from ml.model import recurrent_model
+from ml.model import RecurrentModel
 
 
 def main():
@@ -20,24 +21,35 @@ def main():
     parser.add_argument('-t', '--trials', type=int, required=False, default=10,
                         help='number of training trials (default: 10)')
     parser.add_argument('-w', '--workers', type=int, required=False, default=0,
-                        help='number of CPU workers for data preparation (default: 0)')
+                        help='number of parallel workers (default: 0)')
     parser.add_argument('-d', '--directory', type=str, required=False, default='pickles/learning_metrics',
                         help='directory of pickled output (default: pickles/learning_metrics)')
     args = parser.parse_args()
 
-    # get carry tables
-    with open('pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
-        all_tables = pickle.load(f)
-    tables = all_tables[args.base]
-    
+    # initialize MPI
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    # get carry tables (only root loads, then broadcasts)
+    if rank == 0:
+        with open('pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
+            all_tables = pickle.load(f)
+        tables = all_tables[args.base]
+    else:
+        tables = None
+    tables = comm.bcast(tables, root=0)
+
     # specify torch device (set to GPU if available)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # train model for each table
-    all_learning_metrics = {}
+    # distribute tables among workers
+    local_learning_metrics = {}
     lrs = {'RNN': 0.005, 'GRU': 0.05, 'LSTM': 0.05}
-    for dc, table in tables.items():
-            
+    for i, (dc, table) in enumerate(tables.items()):
+        if i % size != rank:
+            continue
+        
         # initialize learning metrics
         avg_losses = np.zeros(int(args.epochs / 10))
         avg_training_accs = np.zeros(int(args.epochs / 10))
@@ -45,11 +57,11 @@ def main():
 
         # evaluate model multiple times, average metrics
         for _ in range(args.trials):
-
+            
             # initialize model and dataloaders
-            model = recurrent_model(args.base, 1, args.model).to(device)
+            model = RecurrentModel(args.base, 1, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
-                b=args.base, depth=6, table=table, batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
+                b=args.base, depth=6, table=table, batch_size=32, split_type='OOD', split_depth=3, sample=True
             )
 
             # evaluate model and store output
@@ -60,17 +72,24 @@ def main():
             avg_losses += (np.array(losses) / args.trials)
             avg_training_accs += (np.array(training_accs) / args.trials)
             avg_testing_accs += (np.array(testing_accs) / args.trials)
-        
-        # add to learning metrics
+            
+        # add to local learning metrics
         learning_metrics = {'loss': avg_losses, 'training_acc': avg_training_accs, 'testing_acc': avg_testing_accs}
-        all_learning_metrics[dc] = learning_metrics
+        local_learning_metrics[dc] = learning_metrics
+        print(f'Rank {rank}: completed trials for table:\n{table}\n')
 
-        # print progress
-        print(f'completed trials for table:\n{table}\n')
+    # gather all results at root
+    all_local_learning_metrics = comm.gather(local_learning_metrics, root=0)
 
-    # pickle all learning metrics
-    with open(f'{args.directory}/learning_metrics{args.base}_{args.model}_{args.trials}trials.pickle', 'wb') as f:
-        pickle.dump(all_learning_metrics, f)
+    # if root, combine and save results
+    if rank == 0:
+        all_learning_metrics = {}
+        for local_learning_metrics in all_local_learning_metrics:
+            all_learning_metrics.update(local_learning_metrics)
+
+        # pickle all learning metrics
+        with open(f'{args.directory}/learning_metrics{args.base}_{args.model}_{args.trials}trials.pickle', 'wb') as f:
+            pickle.dump(all_learning_metrics, f)
 
 
 if __name__ == '__main__':
