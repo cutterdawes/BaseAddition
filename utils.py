@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
 from tqdm.autonotebook import tqdm
 
-from math.base_rep import CarryTable, BaseElt
+from base_rep import CarryTable, BaseElt
 
 
 ############################## cocycle-finding functions #############################

@@ -11,7 +11,7 @@ from ml.model import RecurrentModel
 
 def main():
     # create and parse arguments
-    parser = argparse.ArgumentParser(description='compute the valid carry tables for specified base')
+    parser = argparse.ArgumentParser(description='train recurrent model to add with each carry function')
     parser.add_argument('-b', '--base', type=int, required=True,
                         help='specified base')
     parser.add_argument('-m', '--model', type=str, required=False, default='RNN',
