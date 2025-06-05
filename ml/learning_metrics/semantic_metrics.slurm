@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics5_semantic1
+#SBATCH --job-name=learning_metrics_semantic_u1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
@@ -15,7 +15,10 @@
 module purge
 module load anaconda3/2024.2
 module load openmpi/gcc/4.1.2
-conda activate torch-env
+conda activate addition
+
+# change to project root
+cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
 python semantic_metrics.py -b 5 -u 1

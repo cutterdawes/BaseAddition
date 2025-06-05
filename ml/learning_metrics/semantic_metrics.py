@@ -56,7 +56,7 @@ def main():
             model = RecurrentModel(args.base, 1, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, semanticity=True, unit=args.unit,
-                batch_size=64, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
+                batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
             )
 
             # evaluate model and store output
