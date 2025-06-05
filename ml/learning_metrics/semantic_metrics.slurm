@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics_semantic_u2
+#SBATCH --job-name=learning_metrics_semantic_u1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
@@ -21,4 +21,4 @@ conda activate addition
 cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
-python -m ml.learning_metrics.semantic_metrics -b 5 -u 2 -m 'GRU' -t 10
+python -m ml.learning_metrics.semantic_metrics -b 5 -u 1 -m 'GRU' -t 10
