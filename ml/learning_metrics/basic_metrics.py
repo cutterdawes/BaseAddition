@@ -40,13 +40,14 @@ def main():
     # specify torch device (set to GPU if available)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # initialize learning metrics and learning rate
+    # initialize learning metrics, learning rate, hidden dim
     if args.parallel:
         local_learning_metrics = {}
     else:
         all_learning_metrics = {}
     lrs = {'RNN': 0.005, 'GRU': 0.05, 'LSTM': 0.05}
     lr = lrs[args.model]
+    hidden_dim = 2*args.base if args.model == 'RNN' else args.base
 
     # train model on each table
     for i, (dc, table) in enumerate(tables.items()):
@@ -62,7 +63,7 @@ def main():
         for _ in range(args.trials):
             
             # initialize model and dataloaders
-            model = RecurrentModel(args.base, 1, args.model).to(device)
+            model = RecurrentModel(args.base, hidden_dim, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, batch_size=32, split_type='OOD', split_depth=3, sample=True
             )

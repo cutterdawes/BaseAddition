@@ -5,7 +5,7 @@ from torch import nn
 class RecurrentModel(nn.Module):
     '''simple recurrent neural network model'''
 
-    def __init__(self, b, layers, type='RNN'):
+    def __init__(self, b, hidden_dim=None, type='RNN'):
         super().__init__()
         '''initialize model'''
 
@@ -13,19 +13,19 @@ class RecurrentModel(nn.Module):
         if b < 2:
             raise ValueError('base must be at least 2')
         self.b = b
-        self.layers = layers 
+        self.hidden_dim = hidden_dim if hidden_dim is not None else b
         if type not in ['RNN', 'GRU', 'LSTM']:
             raise ValueError(f'Invalid RNN type: {type}')
         self.type = type
         
         # define layers
         if self.type == 'RNN':
-            self.recurrent = nn.RNN(b, b, layers, batch_first=True)
+            self.recurrent = nn.RNN(b, hidden_dim, 1, batch_first=True)
         elif self.type == 'GRU':
-            self.recurrent = nn.GRU(b, b, layers, batch_first=True)
+            self.recurrent = nn.GRU(b, hidden_dim, 1, batch_first=True)
         elif self.type == 'LSTM':
-            self.recurrent = nn.LSTM(b, b, layers, batch_first=True)
-        self.linear = nn.Linear(b, b)
+            self.recurrent = nn.LSTM(b, hidden_dim, 1, batch_first=True)
+        self.linear = nn.Linear(hidden_dim, b)
 
         # set weights to Xavier initialization if RNN
         if self.type == 'RNN':

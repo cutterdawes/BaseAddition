@@ -37,6 +37,7 @@ def main():
 
     # train model for each table
     all_learning_metrics = {}
+    hidden_dim = 2*args.base if args.model == 'RNN' else args.base
     for dc, table in tables.items():
 
         # check if table corresponds to a unit
@@ -53,7 +54,7 @@ def main():
         for _ in range(args.trials):
 
             # initialize model and dataloaders
-            model = RecurrentModel(args.base, 1, args.model).to(device)
+            model = RecurrentModel(args.base, hidden_dim, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, semanticity=True, unit=args.unit,
                 batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=args.workers
