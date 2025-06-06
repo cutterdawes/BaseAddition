@@ -27,6 +27,15 @@ class RecurrentModel(nn.Module):
             self.recurrent = nn.LSTM(b, b, layers, batch_first=True)
         self.linear = nn.Linear(b, b)
 
+        # set weights to Xavier initialization if RNN
+        if self.type == 'RNN':
+            for layer in self.recurrent._all_weights:
+                for w in layer:
+                    if 'weight' in w:
+                        nn.init.xavier_uniform_(self.recurrent.state_dict()[w])
+                    elif 'bias' in w:
+                        nn.init.zeros_(self.recurrent.state_dict()[w])
+
     def forward(self, x):
         '''basic forward-pass'''
         x_out, _ = self.recurrent(x)

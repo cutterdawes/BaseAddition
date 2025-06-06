@@ -112,9 +112,13 @@ def eval(
 ) -> Tuple[List, List, List]:
     '''evaluation loop including loss, training accuracies, and testing accuracies'''
 
-    # initialize loss and optimizer
+    # initialize loss and optimizer (and scheduler if RNN)
     criterion = CrossEntropy()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    if model.type == 'RNN':
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode='min', factor=0.2, patience=1000
+        )
 
     # initialize loss and accuracy lists
     losses = []
@@ -152,6 +156,10 @@ def eval(
             if model.type in ['RNN', 'GRU']:  # gradient clipping
                 nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
+
+        # step the scheduler if using RNN
+        if model.type == 'RNN':
+            scheduler.step(loss)
 
         # store loss
         if t % log_interval == 0:
