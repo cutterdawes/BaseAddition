@@ -21,4 +21,4 @@ conda activate addition
 cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
-python -m ml.learning_metrics.semantic_metrics -b 5 -u 2 -m 'GRU' -e 5000 -t 10
+python -m ml.learning_metrics.semantic_metrics -b 5 -u 2 -m 'RNN' -e 5000 -t 10
