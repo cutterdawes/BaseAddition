@@ -95,7 +95,7 @@ def main():
                 all_learning_metrics.update(local_learning_metrics)
 
     # pickle all learning metrics
-    with open(f'{args.directory}/learning_metrics{args.base}_{args.model}_{args.trials}trials.pickle', 'wb') as f:
+    with open(f'{args.directory}/learning_metrics{args.base}_{args.model}_{args.trials}trials_mpirun.pickle', 'wb') as f:
         pickle.dump(all_learning_metrics, f)
 
 
