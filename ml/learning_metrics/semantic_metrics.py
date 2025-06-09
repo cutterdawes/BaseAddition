@@ -35,9 +35,13 @@ def main():
     # specify torch device (set to GPU if available), set number of CPU workers
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    # initialize learning rate, hidden dim
+    lrs = {'RNN': 0.005, 'GRU': 0.05, 'LSTM': 0.05}
+    lr = lrs[args.model]
+    hidden_dim = 2*args.base if args.model == 'RNN' else args.base
+
     # train model for each table
     all_learning_metrics = {}
-    hidden_dim = 2*args.base if args.model == 'RNN' else args.base
     for dc, table in tables.items():
 
         # check if table corresponds to a unit
@@ -62,7 +66,7 @@ def main():
 
             # evaluate model and store output
             losses, training_accs, testing_accs = training.eval(
-                model, training_dataloader, testing_dataloader, device, epochs=args.epochs, lr=0.05, print_loss_and_acc=False
+                model, training_dataloader, testing_dataloader, device, epochs=args.epochs, lr=lr, print_loss_and_acc=False
             )
             avg_losses += (np.array(losses) / args.trials)
             avg_training_accs += (np.array(training_accs) / args.trials)
