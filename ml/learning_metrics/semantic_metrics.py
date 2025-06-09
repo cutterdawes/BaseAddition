@@ -49,7 +49,6 @@ def main():
             continue
             
         # initialize learning metrics
-        args.epochs = 2500
         avg_losses = np.zeros(int(args.epochs / 10))
         avg_training_accs = np.zeros(int(args.epochs / 10))
         avg_testing_accs = np.zeros(int(args.epochs / 10))
