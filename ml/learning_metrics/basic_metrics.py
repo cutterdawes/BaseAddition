@@ -20,7 +20,7 @@ def main():
                         help='number of training epochs (default: 2500)')
     parser.add_argument('-t', '--trials', type=int, required=False, default=10,
                         help='number of training trials (default: 10)')
-    parser.add_argument('-p', '--parallel', type=int, required=False, default=False,
+    parser.add_argument('-p', '--parallel', action='store_true', default=False,
                         help='run in parallel with MPI (default: False)')
     parser.add_argument('-d', '--directory', type=str, required=False, default='pickles/learning_metrics',
                         help='directory of pickled output (default: pickles/learning_metrics)')

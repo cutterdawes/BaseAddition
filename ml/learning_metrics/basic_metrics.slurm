@@ -12,7 +12,7 @@
 
 # load modules and activate environment
 module purge
-module load anaconda3/2024.2
+module load anaconda3/2024.10
 module load openmpi/gcc/4.1.6
 conda activate addition
 
@@ -20,4 +20,4 @@ conda activate addition
 cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
-srun -n 16 python -m ml.learning_metrics.basic_metrics -b 5 -m 'RNN' -e 5000 -t 10
+srun -n 16 python -m ml.learning_metrics.basic_metrics -b 5 -m 'RNN' -e 5000 -t 10 -p
