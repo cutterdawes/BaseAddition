@@ -85,18 +85,24 @@ def main():
             all_learning_metrics[dc] = learning_metrics
             print(f'completed trials for table:\n{table}\n')
 
-    # if parallel, gather all local learning metrics
+    # if parallel, gather all local learning metrics and pickle them
     if args.parallel:
         all_local_learning_metrics = comm.gather(local_learning_metrics, root=0)
+
         # if root, combine and save results
         if rank == 0:
             all_learning_metrics = {}
             for local_learning_metrics in all_local_learning_metrics:
                 all_learning_metrics.update(local_learning_metrics)
 
-    # pickle all learning metrics
-    with open(f'{args.directory}/learning_metrics{args.base}_{args.model}_{args.trials}trials.pickle', 'wb') as f:
-        pickle.dump(all_learning_metrics, f)
+            # pickle all learning metrics
+            with open(f'{args.directory}/learning_metrics{args.base}_{args.model}_{args.trials}trials.pickle', 'wb') as f:
+                pickle.dump(all_learning_metrics, f)
+
+    else:
+        # pickle all learning metrics
+        with open(f'{args.directory}/learning_metrics{args.base}_{args.model}_{args.trials}trials_test.pickle', 'wb') as f:
+            pickle.dump(all_learning_metrics, f)
 
 
 if __name__ == '__main__':
