@@ -38,7 +38,7 @@ def main():
     # initialize learning rate, hidden dim
     lrs = {'RNN': 0.005, 'GRU': 0.05, 'LSTM': 0.05}
     lr = lrs[args.model]
-    hidden_dim = 3*args.base if args.model == 'RNN' else args.base
+    hidden_dim = 4*args.base if args.model == 'RNN' else args.base
 
     # train model for each table
     all_learning_metrics = {}
@@ -79,7 +79,7 @@ def main():
         print(f'completed trials for table:\n{table}\n')
 
     # pickle all learning metrics
-    with open(f'{args.directory}/learning_metrics{args.base}_semantic{args.unit}_{args.model}3b.pickle', 'wb') as f:
+    with open(f'{args.directory}/learning_metrics{args.base}_semantic{args.unit}_{args.model}4b.pickle', 'wb') as f:
         pickle.dump(all_learning_metrics, f)
 
 
