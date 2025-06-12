@@ -48,6 +48,8 @@ def train(
             # zero gradients, perform a backward pass, and update the weights
             optimizer.zero_grad()
             loss.backward()
+            if model.type in ['RNN', 'GRU']:  # gradient clipping
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
 
         # store and print latest loss
