@@ -13,6 +13,7 @@
 # load modules and activate environment
 module purge
 module load anaconda3/2024.10
+# module load openmpi/gcc/4.1.6
 conda activate addition
 
 # change to project root
