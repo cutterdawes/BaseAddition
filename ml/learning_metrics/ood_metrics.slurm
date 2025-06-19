@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics_ood_b5
+#SBATCH --job-name=learning_metrics_ood_b3
 #SBATCH --nodes=1
-#SBATCH --ntasks=32
+#SBATCH --ntasks=3
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=12G
-#SBATCH --time=24:00:00
+#SBATCH --time=01:00:00
 #SBATCH --mail-type=begin,end,fail
 #SBATCH --mail-user=cdawes@princeton.edu
 
@@ -20,4 +20,4 @@ conda activate addition
 cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
-srun -n 32 python -m ml.learning_metrics.ood_metrics -b 5 -N 10 -m 'GRU' -t 10 -p
+srun -n 3 python -m ml.learning_metrics.ood_metrics -b 3 -N 10 -m 'GRU' -t 10 -p
