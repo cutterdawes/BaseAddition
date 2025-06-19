@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics_ood_b3
+#SBATCH --job-name=learning_metrics_ood_b3_new
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -13,7 +13,6 @@
 # load modules and activate environment
 module purge
 module load anaconda3/2024.10
-module load openmpi/gcc/4.1.6
 conda activate addition
 
 # change to project root
