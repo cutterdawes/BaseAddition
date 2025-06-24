@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics_ood_b5
+#SBATCH --job-name=learning_metrics_ood_b3+4
 #SBATCH --nodes=1
-#SBATCH --ntasks=16
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=12G
 #SBATCH --time=24:00:00
@@ -20,4 +20,5 @@ conda activate addition
 cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
-srun -n 16 python -m ml.learning_metrics.ood_metrics -b 5 -N 10 -m 'LSTM' -e 2500 -t 10 -p
+python -m ml.learning_metrics.ood_metrics -b 3 -N 10 -m 'LSTM' -t 10
+python -m ml.learning_metrics.ood_metrics -b 4 -N 10 -m 'LSTM' -t 10
