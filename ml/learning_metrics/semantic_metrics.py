@@ -79,7 +79,7 @@ def main():
         print(f'completed trials for table:\n{table}\n')
 
     # pickle all learning metrics
-    with open(f'{args.directory}/learning_metrics{args.base}_semantic{args.unit}_{args.model}5b.pickle', 'wb') as f:
+    with open(f'{args.directory}/learning_metrics{args.base}_semantic{args.unit}_{args.model}.pickle', 'wb') as f:
         pickle.dump(all_learning_metrics, f)
 
 
