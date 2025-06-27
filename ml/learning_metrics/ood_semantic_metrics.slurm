@@ -20,4 +20,4 @@ conda activate addition
 cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
-python -m ml.learning_metrics.ood_metrics -b 4 -u 1 -N 10 -m 'LSTM' -t 10
+python -m ml.learning_metrics.ood_metrics -b 4 -N 10 -m 'GRU' -t 10

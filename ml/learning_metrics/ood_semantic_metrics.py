@@ -14,8 +14,6 @@ def main():
     parser = argparse.ArgumentParser(description='train recurrent model to add with each carry function, under specified semanticity')
     parser.add_argument('-b', '--base', type=int, required=True,
                         help='Specified base')
-    parser.add_argument('-u', '--unit', type=int, required=True,
-                        help='unit determining ordering of digits')
     parser.add_argument('-N', '--num_digits', type=int, required=False, default=6,
                         help='maximum number of digits to generalize to (default: 6)')
     parser.add_argument('-m', '--model', type=str, required=False, default='RNN',
@@ -60,9 +58,11 @@ def main():
         if args.parallel and (i % size != rank):
             continue
 
-        # check if table corresponds to the One carry function
-        if not np.array_equal(np.unique(table), [0, 1]):
+        # check if table is a single value carry table, and find corresponding unit
+        if not len(np.unique(table)) == 2:
             continue
+        else:
+            unit = np.unique(table)[1]
 
         # initialize learning metrics
         avg_ood_accs = np.zeros(args.num_digits - 2)
@@ -76,7 +76,7 @@ def main():
             # train model
             model = RecurrentModel(args.base, hidden_dim, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
-                b=args.base, depth=6, table=table, semanticity=True, unit=args.unit,
+                b=args.base, depth=6, table=table, semanticity=True, unit=unit,
                 batch_size=32, split_type='OOD', split_depth=3, sample=True
             )
             training.train(model, training_dataloader, device, epochs=args.epochs, lr=lr)
@@ -89,7 +89,7 @@ def main():
             for d in range(4, args.num_digits + 1):
                 # prepare dataloaders
                 training_dataloader, testing_dataloader = dataset.prepare(
-                    b=args.base, depth=d, table=table, semanticity=True, unit=args.unit,
+                    b=args.base, depth=d, table=table, semanticity=True, unit=unit,
                     batch_size=32, split_type='OOD', split_depth=3, sample=True
                 )
 
@@ -124,7 +124,7 @@ def main():
 
     else:
         # pickle all learning metrics
-        with open(f'{args.directory}/learning_metrics{args.base}_ood{args.num_digits}_semantic{args.unit}_{args.model}_{args.trials}trials.pickle', 'wb') as f:
+        with open(f'{args.directory}/learning_metrics{args.base}_ood{args.num_digits}_semantic_{args.model}_{args.trials}trials.pickle', 'wb') as f:
             pickle.dump(all_learning_metrics, f)
 
 
