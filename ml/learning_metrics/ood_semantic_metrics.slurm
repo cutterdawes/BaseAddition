@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # job specifications
-#SBATCH --job-name=learning_metrics_ood_b4
+#SBATCH --job-name=learning_metrics_ood_b3
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -20,4 +20,4 @@ conda activate addition
 cd /home/cdawes/BaseAddition
 
 # execute carry_tables.py script
-python -m ml.learning_metrics.ood_metrics -b 4 -N 10 -m 'GRU' -t 10
+python -m ml.learning_metrics.ood_metrics -b 3 -N 10 -m 'GRU' -t 10
