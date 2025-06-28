@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import torch
 from mpi4py import MPI
+import os
 
 from ml import dataset
 from ml import training
@@ -33,6 +34,10 @@ def main():
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
         size = comm.Get_size()
+
+    # set number of threads according to slurm allocation
+    N = int(os.environ.get("SLURM_CPUS_PER_TASK", 1))
+    torch.set_num_threads(N)
 
     # get carry tables
     with open('pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
