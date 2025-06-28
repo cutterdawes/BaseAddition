@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from mpi4py import MPI
 import os
+import math
 
 from ml import dataset
 from ml import training
@@ -35,9 +36,16 @@ def main():
         rank = comm.Get_rank()
         size = comm.Get_size()
 
-    # set number of threads according to slurm allocation
+    # set number of dataloader workers and threads according to slurm allocation
     N = int(os.environ.get("SLURM_CPUS_PER_TASK", 1))
-    torch.set_num_threads(N)
+    if N > 1:
+        N_workers = math.ceil(0.75 * N)
+        N_threads = N - N_workers
+        torch.set_num_threads(N_threads)
+    else:
+        N_workers = 0
+        N_threads = 1
+        torch.set_num_threads(1)
 
     # get carry tables
     with open('pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
@@ -78,7 +86,7 @@ def main():
             model = RecurrentModel(args.base, hidden_dim, args.model).to(device)
             training_dataloader, testing_dataloader = dataset.prepare(
                 b=args.base, depth=6, table=table, semanticity=True, unit=unit,
-                batch_size=32, split_type='OOD', split_depth=3, sample=True
+                batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=N_workers
             )
             training.train(model, training_dataloader, device, epochs=args.epochs, lr=lr)
 
@@ -91,7 +99,7 @@ def main():
                 # prepare dataloaders
                 training_dataloader, testing_dataloader = dataset.prepare(
                     b=args.base, depth=d, table=table, semanticity=True, unit=unit,
-                    batch_size=32, split_type='OOD', split_depth=3, sample=True
+                    batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=N_workers
                 )
 
                 # test model
