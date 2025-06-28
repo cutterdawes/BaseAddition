@@ -48,16 +48,10 @@ def main():
     hidden_dim = 2*args.base if args.model == 'RNN' else args.base
 
     # initialize metrics storage
-    if args.parallel:
-        local_learning_metrics = {}
-    else:
-        all_learning_metrics = {}
+    all_learning_metrics = {}
 
     # train model for each table
-    for i, (dc, table) in enumerate(tables.items()):
-        if args.parallel and (i % size != rank):
-            continue
-
+    for dc, table in tables.items():
         # check if table is a single value carry table, and find corresponding unit
         if not len(np.unique(table)) == 2:
             continue
@@ -68,7 +62,9 @@ def main():
         avg_ood_accs = np.zeros(args.num_digits - 2)
 
         # evaluate model multiple times, average metrics
-        for _ in range(args.trials):
+        for trial in range(args.trials):
+            if args.parallel and (trial % size != rank):
+                continue
 
             # initialize OOD metrics
             ood_accs = []
@@ -98,34 +94,21 @@ def main():
                 ood_accs.append(acc)
                 
             # average OOD accuracies
-            avg_ood_accs += np.array(ood_accs) / args.trials
+            if args.parallel:
+                if rank == 0:
+                    all_ood_accs = comm.gather(ood_accs, root=0)
+                    for ood_accs in all_ood_accs:
+                        avg_ood_accs += np.array(ood_accs) / args.trials
+            else:
+                avg_ood_accs += np.array(ood_accs) / args.trials
 
         # add to local (if parallel) or all learning metrics
-        if args.parallel:
-            local_learning_metrics[dc] = avg_ood_accs
-            print(f'Rank {rank}: completed trials for table:\n{table}\n')
-        else:
-            all_learning_metrics[dc] = avg_ood_accs
-            print(f'completed trials for table:\n{table}\n')
+        all_learning_metrics[dc] = avg_ood_accs
+        print(f'completed trials for table:\n{table}\n')
 
-    # if parallel, gather all local learning metrics and pickle them
-    if args.parallel:
-        all_local_learning_metrics = comm.gather(local_learning_metrics, root=0)
-
-        # if root, combine and save results
-        if rank == 0:
-            all_learning_metrics = {}
-            for local_learning_metrics in all_local_learning_metrics:
-                all_learning_metrics.update(local_learning_metrics)
-
-            # pickle all learning metrics
-            with open(f'{args.directory}/learning_metrics{args.base}_ood{args.num_digits}_{args.model}_{args.trials}trials.pickle', 'wb') as f:
-                pickle.dump(all_learning_metrics, f)
-
-    else:
-        # pickle all learning metrics
-        with open(f'{args.directory}/learning_metrics{args.base}_ood{args.num_digits}_semantic_{args.model}_{args.trials}trials.pickle', 'wb') as f:
-            pickle.dump(all_learning_metrics, f)
+    # pickle all learning metrics
+    with open(f'{args.directory}/learning_metrics{args.base}_ood{args.num_digits}_semantic_{args.model}_{args.trials}trials.pickle', 'wb') as f:
+        pickle.dump(all_learning_metrics, f)
 
 
 if __name__ == '__main__':
