@@ -4,7 +4,7 @@
 #SBATCH --job-name=learning_metrics_ood_semantic_b3
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=12G
 #SBATCH --time=01:00:00
 #SBATCH --mail-type=begin,end,fail
