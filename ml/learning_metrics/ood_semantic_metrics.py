@@ -37,7 +37,7 @@ def main():
         size = comm.Get_size()
 
     # set number of dataloader workers and threads according to slurm allocation
-    N = int(os.environ.get("SLURM_CPUS_PER_TASK", 1))
+    N = int(os.environ.get('SLURM_CPUS_PER_TASK', 1))
     if N > 1:
         N_workers = math.ceil(0.75 * N)
         N_threads = N - N_workers
