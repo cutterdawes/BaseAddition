@@ -3,9 +3,7 @@ from itertools import product, combinations
 import random
 import pickle
 
-import sys
-sys.path.append('../')
-from math.base_rep import BaseElt
+from base_rep import BaseElt
 
 
 def main():
@@ -16,7 +14,7 @@ def main():
 
     # initialize overall dictionary, all tables
     all_associativity = {}
-    with open('../pickles/carry_tables/all_tables_d1.pickle', 'rb') as f:
+    with open('pickles/carry_tables/all_tables_d1.pickle', 'rb') as f:
         all_tables = pickle.load(f)
 
     # iterate through bases
@@ -63,8 +61,8 @@ def main():
         print('complete\n')
 
     # pickle overall dictionary
-    with open(f'../pickles/complexity_measures/associativity_vs_depth_d{args.depth}.pickle', 'wb') as f:
-        pickle.dump(all_associativity, f)
+    # with open(f'pickles/complexity_measures/associativity_vs_depth_d{args.depth}.pickle', 'wb') as f:
+    #     pickle.dump(all_associativity, f)
 
 
 if __name__ == '__main__':
