@@ -2,6 +2,7 @@ import argparse
 from itertools import product, combinations
 import random
 import pickle
+from mpi4py import MPI
 
 from base_rep import BaseElt
 
@@ -10,11 +11,19 @@ def main():
     # create and parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--depth', type=int, required=True)
+    parser.add_argument('-p', '--parallel', action='store_true', default=False,
+                        help='run in parallel with MPI (default: False)')
     args = parser.parse_args()
 
-    # initialize overall dictionary, all tables
+    # initialize MPI if parallel
+    if args.parallel:
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+
+    # initialize associativity, all tables
     all_associativity = {}
-    with open('pickles/carry_tables/all_tables_d1.pickle', 'rb') as f:
+    with open('pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
         all_tables = pickle.load(f)
 
     # iterate through bases
@@ -25,7 +34,9 @@ def main():
         associativity = {}
 
         # iterate through tables
-        for dc, table in all_tables[b].items():
+        for i, (dc, table) in enumerate(all_tables[b].items()):
+            if args.parallel and (i % size != rank):
+                continue
             
             # iterate through depths
             assoc_vs_depth = []
@@ -33,8 +44,10 @@ def main():
                 tuples = list(product(*[range(b)]*depth))
                 if depth > 3:
                     tuples = random.sample(tuples, b**3)
-                num_assoc = 0
                 triplets = list(combinations(tuples, 3))
+                if len(triplets) > 1000:
+                    triplets = random.sample(triplets, 1000)
+                num_assoc = 0
                 for (n, m, p) in triplets:
             
                     # convert to group elements
@@ -56,12 +69,20 @@ def main():
             # add fraction of associativity to dictionary
             associativity[dc] = assoc_vs_depth
 
+        # gather associativity dict if parallel
+        if args.parallel:
+            gathered_associativity = comm.gather(associativity, root=0)
+            if rank == 0:
+                associativity = {}
+                for assoc in gathered_associativity:
+                    associativity.update(assoc)
+
         # add to overall dictionary
         all_associativity[b] = associativity
         print('complete\n')
 
     # pickle overall dictionary
-    # with open(f'pickles/complexity_measures/associativity_vs_depth_d{args.depth}.pickle', 'wb') as f:
+    # with open(f'pickles/complexity_measures/associativity_vs_depth_d{args.depth}_s1000.pickle', 'wb') as f:
     #     pickle.dump(all_associativity, f)
 
 
