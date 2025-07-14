@@ -5,12 +5,6 @@ This repository contains all the code and data related to the preprint "A Group 
 Below is a tree of the repository structure including descriptions of each folder and the files therein.
 ```
 .
-├── base_rep.py
-│   # base representation class
-├── environment.yml
-│   # conda environment file
-├── figures
-│   # folder to save figures to (created after first save)
 ├── ml
 │   # folder containing ML scripts and notebook
 │   ├── dataset.py
@@ -39,8 +33,6 @@ Below is a tree of the repository structure including descriptions of each folde
 │   │   # recurrent model classes
 │   └── training.py
 │       # model training functions
-├── pickles
-│   # folder to save pickles to (created after first save)
 ├── stats
 │   # folder containing statistics scripts and notebook
 │   ├── associativity.py
@@ -57,8 +49,16 @@ Below is a tree of the repository structure including descriptions of each folde
 │   │   # SLURM script for complexity_measures.py
 │   └── statistics.ipynb
 │       # Jupyter notebook for statistical analysis and figures
-└── utils.py
-    # helper functions
+├── base_rep.py
+│   # base representation class
+├── environment.yml
+│   # conda environment file
+├── utils.py
+│   # helper functions
+├── figures
+│   # folder to save figures to (created after first save)
+└── pickles
+    # folder to save pickles to (created after first save)
 ```
 
 ## Reproducing Results
@@ -72,9 +72,6 @@ conda activate addition
 python -m stats.carry_tables --base 3
 python -m stats.carry_tables --base 4
 python -m stats.carry_tables --base 5
-
-# compile carry tables into all_tables
-...
 
 # compute quantitative measures of carry tables
 python -m stats.complexity_measures --depth 4
