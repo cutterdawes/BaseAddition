@@ -15,5 +15,8 @@ module purge
 module load anaconda3/2023.9
 conda activate env
 
+# change to project root
+cd /home/cdawes/BaseAddition
+
 # execute carry_tables.py script
-python associativity.py -d 6
+python -m stats.associativity -d 6

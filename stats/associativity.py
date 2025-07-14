@@ -2,7 +2,6 @@ import argparse
 from itertools import product, combinations
 import random
 import pickle
-from mpi4py import MPI
 
 from base_rep import BaseElt
 

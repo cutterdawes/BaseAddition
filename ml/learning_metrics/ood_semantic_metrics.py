@@ -18,8 +18,8 @@ def main():
                         help='Specified base')
     parser.add_argument('-N', '--num_digits', type=int, required=False, default=6,
                         help='maximum number of digits to generalize to (default: 6)')
-    parser.add_argument('-m', '--model', type=str, required=False, default='RNN',
-                        help='model type (RNN, GRU, or LSTM; default: RNN)')
+    parser.add_argument('-m', '--model', type=str, required=False, default='GRU',
+                        help='model type (RNN, GRU, or LSTM; default: GRU)')
     parser.add_argument('-e', '--epochs', type=int, required=False, default=2500,
                         help='number of training epochs (default: 2500)')
     parser.add_argument('-t', '--trials', type=int, required=False, default=10,
@@ -96,7 +96,7 @@ def main():
 
             # OOD test up to d digits
             for d in range(4, args.num_digits + 1):
-                # prepare dataloaders
+                # prepare dataloadersGRU
                 training_dataloader, testing_dataloader = dataset.prepare(
                     b=args.base, depth=d, table=table, semanticity=True, unit=unit,
                     batch_size=32, split_type='OOD', split_depth=3, sample=True, num_workers=N_workers

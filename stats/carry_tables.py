@@ -1,19 +1,32 @@
 import argparse
 import pickle
-from itertools import product
+import os
 import numpy as np
 from mpi4py import MPI
-
-import sys
-sys.path.append('../')
 
 import utils
 
 
 def pickle_tables(tables, args):
-    directory = '/home/cdawes/Repo/pickles/bases' if (args.directory is None) else args.directory
-    with open(f'{directory}/tables{args.base}.pickle', 'wb') as file:
-        pickle.dump(tables, file)
+    # create directory if it does not exist
+    directory = 'pickles/carry_tables' if (args.directory is None) else args.directory
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    # load all_tables if it exists, otherwise create an empty dictionary
+    pickle_path = f'{directory}/all_tables.pickle'
+    if os.path.exists(pickle_path):
+        with open(pickle_path, 'rb') as f:
+            all_tables = pickle.load(f)
+    else:
+        all_tables = {}
+    # update all_tables with the new tables
+    if args.base in all_tables:
+        all_tables[args.base].update(tables)
+    else:
+        all_tables[args.base] = tables
+    # pickle all_tables
+    with open(f'{pickle_path}', 'wb') as file:
+        pickle.dump(all_tables, file)
     if not args.parallel:
         print(f'Function executed successfully.\nOutput saved to {directory}/tables{args.base}.pickle')
 

@@ -16,5 +16,8 @@ module load anaconda3/2023.9
 module load openmpi/gcc/4.1.2
 conda activate env
 
+# change to project root
+cd /home/cdawes/BaseAddition
+
 # execute carry_tables.py script
-srun -n 4 python carry_tables.py -b 10 -p
+srun -n 4 python stats/carry_tables.py -b 10 -p

@@ -15,8 +15,8 @@ def main():
                         help='Specified base')
     parser.add_argument('-u', '--unit', type=int, required=True,
                         help='unit determining ordering of digits')
-    parser.add_argument('-m', '--model', type=str, required=False, default='RNN',
-                        help='model type (RNN, GRU, or LSTM; default: RNN)')
+    parser.add_argument('-m', '--model', type=str, required=False, default='GRU',
+                        help='model type (RNN, GRU, or LSTM; default: GRU)')
     parser.add_argument('-e', '--epochs', type=int, required=False, default=2500,
                         help='number of training epochs (default: 2500)')
     parser.add_argument('-t', '--trials', type=int, required=False, default=10,

@@ -2,14 +2,11 @@ import argparse
 import pickle
 import numpy as np
 
-import sys
-sys.path.append('../')
-
 import utils
 
 
 def pickle_measures(measures, args):
-    directory = '/home/cdawes/Repo/pickles' if (args.directory is None) else args.directory
+    directory = 'pickles/complexity_measures' if (args.directory is None) else args.directory
     for filename, measure in measures.items():
         with open(f'{directory}/{filename}.pickle', 'wb') as file:
             pickle.dump(measure, file)
@@ -20,7 +17,7 @@ def pickle_measures(measures, args):
 
 def compute_measures(args):
     # load all_tables, get maximum depth if specified
-    with open('../pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
+    with open('pickles/carry_tables/all_tables_d1_b2-6.pickle', 'rb') as f:
         all_tables = pickle.load(f)
     bases = list(all_tables.keys())
     max_depth = args.depth if args.depth else 4
