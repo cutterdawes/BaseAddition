@@ -28,7 +28,7 @@ def pickle_tables(tables, args):
     with open(f'{pickle_path}', 'wb') as file:
         pickle.dump(all_tables, file)
     if not args.parallel:
-        print(f'Function executed successfully.\nOutput saved to {directory}/tables{args.base}.pickle')
+        print(f'Function executed successfully.\nOutput saved to {pickle_path}.pickle')
 
 
 def consolidate_tables(tables):
