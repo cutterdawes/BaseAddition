@@ -2,6 +2,7 @@ import math
 import random
 from itertools import product, combinations
 import numpy as np
+import pickle
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import BoundaryNorm
@@ -10,7 +11,7 @@ from tqdm.autonotebook import tqdm
 from base_rep import CarryTable, BaseElt
 
 
-############################## cocycle-finding functions #############################
+### cocycle-finding functions ######################################################
 
 def assert_cocycle(table, depth=1, sample=False):
     b = table.shape[0]
@@ -98,7 +99,7 @@ def construct_tables(b, depth=1, sample=False):
     return table_dict
 
 
-####################### complexity measures of carry tables ########################
+### complexity measures of carry tables ###############################
 
 def get_border(table):
     diff_ax0 = np.diff(table, axis=0, prepend=0)
@@ -144,7 +145,7 @@ def get_min_dim(table, b):
                 min_dim = dim
     return min_dim
 
-############################## displaying carry tables #############################
+### displaying carry tables ###############################################
 
 def add_border(ax, color='blue', width=2):
     for spine in ax.spines.values():
@@ -163,8 +164,10 @@ def show_tables(table_dict, b, depth=1, savefig=False):
     except:
         axes = [axes]
 
-    # sort table_dict
+    # sort table_dict and load est. dims
     table_dict = {dc: table_dict[dc] for dc in sorted(table_dict.keys())}
+    with open('../pickles/complexity_measures/est_dim_box_vs_depth.pickle', 'rb') as f:
+        est_dim_box_vs_depth = pickle.load(f)
     
     # iterate through table_dict
     i = 0
@@ -174,15 +177,13 @@ def show_tables(table_dict, b, depth=1, savefig=False):
         if (depth > 1):
             table = construct_product_table(table, depth)
 
-        # classify as standard, alt. unit, or other carry
-        if (np.array(dc) == 0).all():
-            carry_type = 'Standard'
+        # classify as Single Value, Low Dim. Multiple Value, or Other Multiple Value
+        est_dim = est_dim_box_vs_depth[b][dc][3]
+        if len(np.unique(table)) == 2:
             color = 'blue'
-        elif len(np.unique(table)) == 2:
-            carry_type = 'Alt. Unit'
+        elif est_dim > 1.25 and est_dim < 1.5:
             color = 'orange'
         else:
-            carry_type = 'Other'
             color = 'silver'
 
         # display image, increment i
@@ -191,7 +192,6 @@ def show_tables(table_dict, b, depth=1, savefig=False):
         levels = np.linspace(-0.5, b-0.5, b+1)
         norm = BoundaryNorm(levels, ncolors=256)
         im = ax.imshow(table, cmap='viridis', norm=norm)
-        # ax.set_title(carry_type, fontsize=10)
         i += 1
 
     # turn off axis ticks and labels

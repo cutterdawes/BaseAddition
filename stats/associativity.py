@@ -36,7 +36,7 @@ def main():
 
                 # generate tuples and triplets
                 tuples = list(product(*[range(b)]*depth))
-                if depth >= 3:
+                if depth > 3:
                     tuples = random.sample(tuples, b**3)
                 triplets = list(combinations(tuples, 3))
                 if len(triplets) > args.sample and args.sample != 0:
